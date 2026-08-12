@@ -15,16 +15,16 @@
   background:
     linear-gradient(90deg, transparent 0 22%, rgb(90 167 255 / 0.06) 22.12% 22.24%, transparent 22.36% 100%),
     linear-gradient(125deg, transparent 0 66%, rgb(40 215 197 / 0.07) 66.12% 66.26%, transparent 66.4% 100%);
-  opacity: 0.8;
+  opacity: 0.55;
 }
 
 .cq-terminal-panel,
 .cq-world-schematic {
-  min-height: 620px;
+  min-height: 580px;
   border: 1px solid var(--cq-color-border);
   border-radius: var(--cq-radius-md);
   background: linear-gradient(145deg, rgb(17 27 37 / 0.94), rgb(9 15 22 / 0.96));
-  box-shadow: var(--cq-shadow-panel);
+  box-shadow: var(--cq-shadow-soft);
 }
 
 .cq-terminal-panel {
@@ -44,7 +44,7 @@
 .cq-panel-heading h2 {
   margin-top: 0.35rem;
   color: var(--cq-color-text-strong);
-  font-size: clamp(1.35rem, 2.8vw, 2.25rem);
+  font-size: clamp(1.35rem, 2.5vw, 2.05rem);
   font-weight: 750;
   line-height: 1.05;
 }
@@ -116,7 +116,7 @@
   color: var(--cq-color-accent);
   font-family: var(--cq-font-mono);
   font-size: 0.95rem;
-  line-height: 1.8;
+  line-height: 1.7;
 }
 
 .cq-answer-field {
@@ -260,8 +260,8 @@
 .cq-generator-ring {
   display: grid;
   position: relative;
-  width: 150px;
-  height: 150px;
+  width: 136px;
+  height: 136px;
   place-items: center;
   border: 1px solid var(--cq-color-border);
   border-radius: 999px;
@@ -326,8 +326,8 @@
 
 .cq-door-frame {
   position: relative;
-  width: 170px;
-  height: 210px;
+  width: 156px;
+  height: 196px;
   overflow: hidden;
   border: 1px solid rgb(90 167 255 / 0.24);
   border-radius: var(--cq-radius-sm);

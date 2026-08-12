@@ -12,10 +12,14 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.46;
+  opacity: 0.32;
   background-image:
     linear-gradient(115deg, transparent 0 28%, rgb(40 215 197 / 0.09) 28.15% 28.32%, transparent 28.46% 100%),
     linear-gradient(64deg, transparent 0 61%, rgb(90 167 255 / 0.08) 61.12% 61.28%, transparent 61.42% 100%);
+}
+
+.cq-hero h1 {
+  overflow-wrap: break-word;
 }
 
 .cq-product-visual {
@@ -119,7 +123,7 @@
 .cq-assignment-card {
   top: 2%;
   left: 0;
-  width: min(100%, 360px);
+  width: min(100%, 350px);
   padding: 1.25rem;
   transform: translate3d(calc(var(--hero-pointer-x) * -7px), calc(var(--hero-pointer-y) * -5px), 0);
 }
@@ -142,9 +146,9 @@
 }
 
 .cq-terminal-card {
-  top: 28%;
-  right: 4%;
-  width: min(88%, 380px);
+  top: 26%;
+  right: 0;
+  width: min(86%, 360px);
   padding: 1.15rem;
   transform: translate3d(calc(var(--hero-pointer-x) * 9px), calc(var(--hero-pointer-y) * 7px), 0);
 }
@@ -159,9 +163,9 @@
 }
 
 .cq-world-card {
-  top: 45%;
-  left: 9%;
-  width: min(90%, 350px);
+  top: 44%;
+  left: 4%;
+  width: min(88%, 340px);
   padding: 1.15rem;
   transform: translate3d(calc(var(--hero-pointer-x) * -11px), calc(var(--hero-pointer-y) * 8px), 0);
 }
@@ -188,8 +192,8 @@
 
 .cq-insight-card {
   right: 0;
-  bottom: 4%;
-  width: min(94%, 405px);
+  bottom: 2%;
+  width: min(92%, 390px);
   padding: 1.25rem;
   transform: translate3d(calc(var(--hero-pointer-x) * 7px), calc(var(--hero-pointer-y) * -9px), 0);
 }
@@ -222,10 +226,10 @@
 }
 
 .cq-flow-card {
-  right: 13%;
-  bottom: 32%;
+  right: 7%;
+  bottom: 26%;
   display: flex;
-  width: min(82%, 440px);
+  width: min(74%, 390px);
   align-items: center;
   gap: 0.55rem;
   padding: 0.75rem;
@@ -278,6 +282,8 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  text-align: center;
+  white-space: normal;
   transition:
     transform var(--cq-transition-fast),
     border-color var(--cq-transition-fast),
@@ -373,6 +379,21 @@
 }
 
 @media (max-width: 720px) {
+  .cq-hero h1 {
+    font-size: clamp(3.2rem, 13vw, 4.4rem);
+    line-height: 1.04;
+  }
+
+  .cq-hero .cq-button {
+    width: 100%;
+    max-width: calc(100vw - 3rem);
+  }
+
+  .cq-hero p {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+
   .cq-product-visual {
     min-height: auto;
   }
@@ -404,5 +425,11 @@
 
   .cq-flow-step {
     flex-basis: calc(50% - 0.5rem);
+  }
+
+  .cq-status-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
   }
 }

@@ -17,13 +17,13 @@
   background:
     linear-gradient(116deg, transparent 0 38%, rgb(40 215 197 / 0.075) 38.1% 38.22%, transparent 38.34% 100%),
     linear-gradient(58deg, transparent 0 63%, rgb(90 167 255 / 0.07) 63.1% 63.24%, transparent 63.38% 100%);
-  opacity: 0.74;
+  opacity: 0.48;
 }
 
 .cq-how h2 {
   margin-top: 0.6rem;
   color: var(--cq-color-text-strong);
-  font-size: clamp(2.35rem, 5vw, 4.7rem);
+  font-size: clamp(2.25rem, 4.4vw, 4.15rem);
   font-weight: 760;
   line-height: 1.02;
 }
@@ -41,15 +41,15 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(1rem, 2vw, 1.4rem);
-  margin-top: 4rem;
+  margin-top: 3.25rem;
   border: 1px solid var(--cq-color-border);
   border-radius: var(--cq-radius-md);
   background:
-    linear-gradient(90deg, rgb(38 53 68 / 0.26) 1px, transparent 1px),
-    linear-gradient(180deg, rgb(38 53 68 / 0.2) 1px, transparent 1px),
-    linear-gradient(145deg, rgb(17 27 37 / 0.78), rgb(7 11 16 / 0.92));
+    linear-gradient(90deg, rgb(38 53 68 / 0.16) 1px, transparent 1px),
+    linear-gradient(180deg, rgb(38 53 68 / 0.14) 1px, transparent 1px),
+    linear-gradient(145deg, rgb(17 27 37 / 0.62), rgb(7 11 16 / 0.88));
   background-size: 44px 44px, 44px 44px, 100% 100%;
-  box-shadow: var(--cq-shadow-panel);
+  box-shadow: var(--cq-shadow-soft);
   padding: clamp(1rem, 3vw, 2rem);
 }
 
@@ -80,7 +80,7 @@
   display: grid;
   align-content: start;
   gap: 1.1rem;
-  min-height: 340px;
+  min-height: 300px;
   border: 1px solid rgb(38 53 68 / 0.86);
   border-radius: var(--cq-radius-md);
   background: linear-gradient(145deg, rgb(17 27 37 / 0.92), rgb(9 15 22 / 0.94));
@@ -94,7 +94,7 @@
 .cq-journey-stage:hover {
   border-color: rgb(40 215 197 / 0.44);
   box-shadow: var(--cq-shadow-soft), 0 0 34px rgb(40 215 197 / 0.08);
-  transform: translateY(-5px);
+  transform: translateY(-3px);
 }
 
 .cq-stage-node {
@@ -102,7 +102,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  min-height: 4.5rem;
+  min-height: 4rem;
   border: 1px solid rgb(40 215 197 / 0.24);
   border-radius: var(--cq-radius-sm);
   background:
@@ -132,7 +132,7 @@
 
 .cq-stage-title-row h3 {
   color: var(--cq-color-text-strong);
-  font-size: clamp(1.45rem, 2.5vw, 2rem);
+  font-size: clamp(1.35rem, 2.2vw, 1.8rem);
   font-weight: 780;
   line-height: 1;
   text-transform: uppercase;

@@ -17,13 +17,13 @@
   background:
     linear-gradient(128deg, transparent 0 44%, rgb(40 215 197 / 0.07) 44.12% 44.26%, transparent 44.4% 100%),
     linear-gradient(48deg, transparent 0 70%, rgb(90 167 255 / 0.06) 70.12% 70.25%, transparent 70.4% 100%);
-  opacity: 0.76;
+  opacity: 0.52;
 }
 
 .cq-worlds h2 {
   margin-top: 0.6rem;
   color: var(--cq-color-text-strong);
-  font-size: clamp(2.35rem, 5vw, 4.7rem);
+  font-size: clamp(2.25rem, 4.4vw, 4.2rem);
   font-weight: 760;
   line-height: 1.02;
 }

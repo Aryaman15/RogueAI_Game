@@ -17,14 +17,14 @@
   background-image:
     linear-gradient(rgb(40 215 197 / 0.045) 1px, transparent 1px),
     linear-gradient(90deg, rgb(90 167 255 / 0.04) 1px, transparent 1px);
-  background-size: 56px 56px;
+  background-size: 64px 64px;
   mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
 }
 
 .cq-problem h2 {
   margin-top: 0.6rem;
   color: var(--cq-color-text-strong);
-  font-size: clamp(2.4rem, 5vw, 4.9rem);
+  font-size: clamp(2.25rem, 4.4vw, 4.25rem);
   font-weight: 760;
   line-height: 1.02;
 }
@@ -37,7 +37,7 @@
 }
 
 .cq-compare-shell {
-  margin-top: 3rem;
+  margin-top: 2.5rem;
 }
 
 .cq-compare-toggle {
@@ -84,7 +84,7 @@
 
 .cq-compare-stage {
   display: grid;
-  min-height: 630px;
+  min-height: 560px;
   overflow: hidden;
   border: 1px solid var(--cq-color-border);
   border-radius: var(--cq-radius-md);
@@ -93,14 +93,14 @@
     linear-gradient(180deg, rgb(38 53 68 / 0.26) 1px, transparent 1px),
     linear-gradient(145deg, rgb(17 27 37 / 0.88), rgb(7 11 16 / 0.95));
   background-size: 42px 42px, 42px 42px, 100% 100%;
-  box-shadow: var(--cq-shadow-panel);
+  box-shadow: var(--cq-shadow-soft);
 }
 
 .cq-compare-panel {
   position: relative;
   grid-area: 1 / 1;
   display: grid;
-  min-height: 630px;
+  min-height: 560px;
   place-items: center;
   padding: clamp(1.25rem, 4vw, 3rem);
   opacity: 0;
@@ -141,7 +141,7 @@
   border: 1px solid var(--cq-color-border);
   border-radius: var(--cq-radius-md);
   background: linear-gradient(145deg, rgb(17 27 37 / 0.96), rgb(9 15 22 / 0.98));
-  box-shadow: var(--cq-shadow-panel);
+  box-shadow: var(--cq-shadow-soft);
 }
 
 .cq-traditional-paper {
@@ -178,7 +178,7 @@
 
 .cq-score-card {
   display: grid;
-  min-height: 210px;
+  min-height: 184px;
   place-items: center;
   margin-top: 2rem;
   border: 1px solid var(--cq-color-border-subtle);
@@ -201,7 +201,7 @@
   display: block;
   margin-top: 0.4rem;
   color: var(--cq-color-text-strong);
-  font-size: clamp(4rem, 12vw, 7rem);
+  font-size: clamp(3.6rem, 10vw, 6.1rem);
   font-weight: 850;
   line-height: 0.92;
 }

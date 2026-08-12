@@ -17,7 +17,7 @@
   background-image:
     linear-gradient(rgb(40 215 197 / 0.045) 1px, transparent 1px),
     linear-gradient(90deg, rgb(90 167 255 / 0.04) 1px, transparent 1px);
-  background-size: 54px 54px;
+  background-size: 64px 64px;
   mask-image: linear-gradient(to bottom, transparent, black 18%, black 72%, transparent);
 }
 
@@ -29,7 +29,7 @@
   background:
     linear-gradient(135deg, rgb(17 27 37 / 0.9), rgb(7 11 16 / 0.96)),
     var(--cq-color-surface);
-  box-shadow: var(--cq-shadow-panel);
+  box-shadow: var(--cq-shadow-soft);
 }
 
 .cq-final-light {
@@ -45,15 +45,15 @@
   position: relative;
   display: grid;
   justify-items: center;
-  padding: clamp(2rem, 7vw, 5.5rem) clamp(1.25rem, 5vw, 4rem);
+  padding: clamp(2rem, 6vw, 4.75rem) clamp(1.25rem, 5vw, 4rem);
   text-align: center;
 }
 
 .cq-final h2 {
-  max-width: 920px;
+  max-width: 860px;
   margin-top: 0.7rem;
   color: var(--cq-color-text-strong);
-  font-size: clamp(2.35rem, 5.2vw, 5.35rem);
+  font-size: clamp(2.2rem, 4.6vw, 4.6rem);
   font-weight: 780;
   line-height: 1.02;
 }
@@ -61,7 +61,7 @@
 .cq-final-rhythm {
   margin-top: 1.4rem;
   color: var(--cq-color-accent);
-  font-size: clamp(1.35rem, 2.8vw, 2.4rem);
+  font-size: clamp(1.25rem, 2.3vw, 2rem);
   font-weight: 760;
   line-height: 1.25;
 }
