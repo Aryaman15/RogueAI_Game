@@ -112,8 +112,8 @@ namespace RogueAI.Interaction
 
         public void EndTerminalChallenge()
         {
-            SetGameplayInputEnabled(true);
             terminalChallengeOpen = false;
+            SetGameplayInputEnabled(true);
         }
 
         private void UpdateCurrentTarget()

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using RogueAI.Challenges;
 using RogueAI.Interaction;
+using RogueAI.Level;
 using StarterAssets;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -47,6 +48,7 @@ public static class Level1Builder
 
         EnsureFolder("Assets", "Scripts");
         EnsureFolder("Assets/Scripts", "Editor");
+        EnsureFolder("Assets/Scripts", "Level");
         EnsureFolder("Assets", "Level1");
         EnsureFolder("Assets/Level1", "Materials");
 
@@ -61,6 +63,7 @@ public static class Level1Builder
         PreparePreservedPlayerSetup();
         BuildGreyboxLevel();
         ConfigureInteractionSystem();
+        ConfigureWorldStateSystem();
         AddLevelToBuildSettingsPreservingPlayground();
 
         EditorSceneManager.MarkSceneDirty(scene);
@@ -181,14 +184,24 @@ public static class Level1Builder
         AddCube(frameParent, "SecurityDoor_Frame_Left", new Vector3(-1.85f, 1.5f, 8f), new Vector3(0.3f, 3f, 0.45f), "Frame");
         AddCube(frameParent, "SecurityDoor_Frame_Right", new Vector3(1.85f, 1.5f, 8f), new Vector3(0.3f, 3f, 0.45f), "Frame");
         AddCube(frameParent, "SecurityDoor_Frame_Top", new Vector3(0f, 3.05f, 8f), new Vector3(4f, 0.3f, 0.45f), "Frame");
-        AddCube(propsParent, "SecurityDoor_Locked_Placeholder", new Vector3(0f, 1.45f, 8f), new Vector3(3f, 2.8f, 0.25f), "Door");
-        AddLabel(signageParent, "Sign_SecurityDoorOffline", "SECURITY DOOR\nOFFLINE", new Vector3(0f, 2.35f, 7.72f), Quaternion.Euler(0f, 180f, 0f), 0.42f, "Warning");
+        GameObject door = AddCube(propsParent, "SecurityDoor_Locked_Placeholder", new Vector3(0f, 1.45f, 8f), new Vector3(3f, 2.8f, 0.25f), "Door");
+        TextMesh statusLabel = AddLabel(signageParent, "Sign_SecurityDoorOffline", "SECURITY DOOR\nPOWER OFFLINE", new Vector3(0f, 2.35f, 7.72f), Quaternion.Euler(0f, 180f, 0f), 0.38f, "Warning");
+
+        DoorController doorController = door.AddComponent<DoorController>();
+        doorController.Configure(door.transform, statusLabel);
+        doorController.Lock();
     }
 
     private static void BuildGeneratorRoomProps(Transform propsParent, Transform signageParent)
     {
-        AddCube(propsParent, "Generator_Placeholder_Base", new Vector3(12.3f, 0.55f, 3f), new Vector3(2.6f, 1.1f, 1.5f), "Generator");
-        AddCube(propsParent, "Generator_Placeholder_Core", new Vector3(12.3f, 1.45f, 3f), new Vector3(1.5f, 0.7f, 1f), "GeneratorAccent");
+        GameObject generatorRoot = CreateChild(propsParent.gameObject, "Generator_Placeholder");
+        AddCube(generatorRoot.transform, "Generator_Placeholder_Base", new Vector3(12.3f, 0.55f, 3f), new Vector3(2.6f, 1.1f, 1.5f), "Generator");
+        GameObject core = AddCube(generatorRoot.transform, "Generator_Placeholder_Core", new Vector3(12.3f, 1.45f, 3f), new Vector3(1.5f, 0.7f, 1f), "GeneratorOff");
+        GameObject rotor = AddCube(generatorRoot.transform, "Generator_Rotor_Placeholder", new Vector3(12.3f, 1.92f, 3f), new Vector3(1.8f, 0.16f, 0.16f), "GeneratorAccent");
+        Light generatorLight = AddPointLight(generatorRoot.transform, "Light_Generator_Running", new Vector3(12.3f, 2.3f, 3f), 0f, 5f, new Color(0.15f, 1f, 0.85f));
+
+        GeneratorController generator = generatorRoot.AddComponent<GeneratorController>();
+        generator.Configure(core.GetComponent<Renderer>(), Materials["GeneratorOff"], Materials["GeneratorOn"], generatorLight, rotor.transform);
 
         GameObject terminalRoot = CreateChild(propsParent.gameObject, "Terminal_Placeholder");
         terminalRoot.AddComponent<TerminalInteractable>();
@@ -264,14 +277,44 @@ public static class Level1Builder
     private static void BuildLighting(Transform parent)
     {
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-        RenderSettings.ambientLight = new Color(0.38f, 0.42f, 0.46f);
+        RenderSettings.ambientLight = new Color(0.28f, 0.18f, 0.16f);
 
-        AddDirectionalLight(parent, "Directional Light", new Vector3(0f, 8f, -8f), Quaternion.Euler(50f, -30f, 0f), 0.8f);
-        AddPointLight(parent, "Light_Entry", new Vector3(0f, 2.6f, -6f), 3.5f, 9f, new Color(0.95f, 0.9f, 0.78f));
-        AddPointLight(parent, "Light_Door", new Vector3(0f, 2.6f, 6f), 3.2f, 8f, new Color(1f, 0.65f, 0.55f));
-        AddPointLight(parent, "Light_GeneratorRoom", new Vector3(11f, 2.6f, 3f), 4f, 9f, new Color(0.7f, 0.9f, 1f));
-        AddPointLight(parent, "Light_SecuredCorridor", new Vector3(0f, 2.6f, 17f), 3f, 9f, new Color(0.8f, 0.95f, 1f));
-        AddPointLight(parent, "Light_Exit", new Vector3(0f, 2.6f, 28.5f), 3.5f, 8f, new Color(0.65f, 1f, 0.75f));
+        Light emergencyEntry = AddPointLight(parent, "Emergency_Light_Entry", new Vector3(0f, 2.6f, -6f), 2.8f, 8f, new Color(1f, 0.42f, 0.25f));
+        Light emergencyDoor = AddPointLight(parent, "Emergency_Light_Door", new Vector3(0f, 2.6f, 6f), 2.8f, 8f, new Color(1f, 0.25f, 0.18f));
+        Light emergencyGenerator = AddPointLight(parent, "Emergency_Light_GeneratorRoom", new Vector3(11f, 2.6f, 3f), 2.8f, 8f, new Color(1f, 0.48f, 0.25f));
+
+        Light poweredDirectional = AddDirectionalLight(parent, "Powered_Directional_Light", new Vector3(0f, 8f, -8f), Quaternion.Euler(50f, -30f, 0f), 0f);
+        Light poweredEntry = AddPointLight(parent, "Powered_Light_Entry", new Vector3(0f, 2.6f, -6f), 0f, 9f, new Color(0.9f, 0.96f, 1f));
+        Light poweredDoor = AddPointLight(parent, "Powered_Light_Door", new Vector3(0f, 2.6f, 9.5f), 0f, 9f, new Color(0.65f, 1f, 0.95f));
+        Light poweredGenerator = AddPointLight(parent, "Powered_Light_GeneratorRoom", new Vector3(11f, 2.6f, 3f), 0f, 9f, new Color(0.7f, 0.95f, 1f));
+        Light poweredSecured = AddPointLight(parent, "Powered_Light_SecuredCorridor", new Vector3(0f, 2.6f, 17f), 0f, 9f, new Color(0.8f, 0.95f, 1f));
+        Light poweredExit = AddPointLight(parent, "Powered_Light_Exit", new Vector3(0f, 2.6f, 28.5f), 0f, 8f, new Color(0.65f, 1f, 0.75f));
+
+        FacilityPowerController powerController = parent.gameObject.AddComponent<FacilityPowerController>();
+        powerController.Configure(
+            new[] { emergencyEntry, emergencyDoor, emergencyGenerator },
+            new[] { poweredDirectional, poweredEntry, poweredDoor, poweredGenerator, poweredSecured, poweredExit });
+        powerController.ApplyInitialPowerOffState();
+    }
+
+    private static void ConfigureWorldStateSystem()
+    {
+        GameObject flowObject = new GameObject("Level1_FlowController");
+        Level1FlowController flowController = flowObject.AddComponent<Level1FlowController>();
+
+        TerminalInteractable terminal = Object.FindFirstObjectByType<TerminalInteractable>();
+        GeneratorController generator = Object.FindFirstObjectByType<GeneratorController>();
+        FacilityPowerController powerController = Object.FindFirstObjectByType<FacilityPowerController>();
+        DoorController door = Object.FindFirstObjectByType<DoorController>();
+        PlayerInteraction playerInteraction = Object.FindFirstObjectByType<PlayerInteraction>();
+
+        if (!terminal || !generator || !powerController || !door || !playerInteraction)
+        {
+            Debug.LogWarning("Level1Builder could not fully configure Level1_FlowController. Check generated terminal, generator, power, door, and player objects.");
+            return;
+        }
+
+        flowController.Configure(terminal, generator, powerController, door, playerInteraction);
     }
 
     private class InteractionUiRefs
@@ -543,7 +586,7 @@ public static class Level1Builder
         return cube;
     }
 
-    private static void AddLabel(Transform parent, string name, string text, Vector3 position, Quaternion rotation, float size, string materialKey)
+    private static TextMesh AddLabel(Transform parent, string name, string text, Vector3 position, Quaternion rotation, float size, string materialKey)
     {
         GameObject label = new GameObject(name);
         label.transform.SetParent(parent);
@@ -561,9 +604,11 @@ public static class Level1Builder
         {
             renderer.sharedMaterial = material;
         }
+
+        return textMesh;
     }
 
-    private static void AddDirectionalLight(Transform parent, string name, Vector3 position, Quaternion rotation, float intensity)
+    private static Light AddDirectionalLight(Transform parent, string name, Vector3 position, Quaternion rotation, float intensity)
     {
         GameObject lightObject = new GameObject(name);
         lightObject.transform.SetParent(parent);
@@ -572,9 +617,10 @@ public static class Level1Builder
         Light light = lightObject.AddComponent<Light>();
         light.type = LightType.Directional;
         light.intensity = intensity;
+        return light;
     }
 
-    private static void AddPointLight(Transform parent, string name, Vector3 position, float intensity, float range, Color color)
+    private static Light AddPointLight(Transform parent, string name, Vector3 position, float intensity, float range, Color color)
     {
         GameObject lightObject = new GameObject(name);
         lightObject.transform.SetParent(parent);
@@ -585,6 +631,7 @@ public static class Level1Builder
         light.intensity = intensity;
         light.range = range;
         light.color = color;
+        return light;
     }
 
     private static GameObject CreateChild(GameObject parent, string name)
@@ -660,6 +707,8 @@ public static class Level1Builder
         Materials["Frame"] = GetOrCreateMaterial("M_Greybox_Frame", new Color(0.18f, 0.20f, 0.22f));
         Materials["Door"] = GetOrCreateMaterial("M_SecurityDoor_Red", new Color(0.65f, 0.12f, 0.10f));
         Materials["Generator"] = GetOrCreateMaterial("M_Generator_Dark", new Color(0.12f, 0.18f, 0.20f));
+        Materials["GeneratorOff"] = GetOrCreateMaterial("M_Generator_Off", new Color(0.28f, 0.16f, 0.12f));
+        Materials["GeneratorOn"] = GetOrCreateMaterial("M_Generator_On", new Color(0.1f, 0.95f, 0.75f));
         Materials["GeneratorAccent"] = GetOrCreateMaterial("M_Generator_Cyan", new Color(0.10f, 0.75f, 0.85f));
         Materials["Terminal"] = GetOrCreateMaterial("M_Terminal_Body", new Color(0.08f, 0.09f, 0.11f));
         Materials["TerminalScreen"] = GetOrCreateMaterial("M_Terminal_Screen", new Color(0.05f, 0.85f, 0.35f));
