@@ -283,6 +283,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-align: center;
+  text-decoration: none;
   white-space: normal;
   transition:
     transform var(--cq-transition-fast),

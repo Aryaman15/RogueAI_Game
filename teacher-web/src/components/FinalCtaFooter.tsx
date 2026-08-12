@@ -1,4 +1,5 @@
 import { ArrowRight, Compass, Sparkles } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 import './final-cta-footer.css'
 
@@ -23,10 +24,10 @@ export function FinalCtaFooter() {
               Understand it.
             </p>
             <div className="cq-final-actions">
-              <button className="cq-button cq-button-primary" type="button">
+              <Link className="cq-button cq-button-primary" to="/teacher/missions/new">
                 Create a mission
                 <ArrowRight aria-hidden="true" className="size-4" />
-              </button>
+              </Link>
               <button className="cq-button cq-button-secondary" type="button">
                 <Compass aria-hidden="true" className="size-4" />
                 Explore worlds

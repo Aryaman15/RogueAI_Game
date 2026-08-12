@@ -1,20 +1,26 @@
-import { Hero } from './components/Hero'
-import { ExperienceClassQuest } from './components/ExperienceClassQuest'
-import { HowClassQuestWorks } from './components/HowClassQuestWorks'
-import { ProblemSection } from './components/ProblemSection'
-import { ClassQuestWorlds } from './components/ClassQuestWorlds'
-import { FinalCtaFooter } from './components/FinalCtaFooter'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+
+import { LandingPage } from './pages/LandingPage'
+import { TeacherLayout } from './teacher/TeacherLayout'
+import { TeacherDashboard } from './teacher/TeacherDashboard'
+import { CreateMissionWizard } from './teacher/CreateMissionWizard'
+import { MissionReport } from './teacher/MissionReport'
+import { StudentDiagnostic } from './teacher/StudentDiagnostic'
 
 function App() {
   return (
-    <main className="min-h-screen overflow-hidden bg-cq-background text-cq-text">
-      <Hero />
-      <ExperienceClassQuest />
-      <ProblemSection />
-      <HowClassQuestWorks />
-      <ClassQuestWorlds />
-      <FinalCtaFooter />
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<LandingPage />} path="/" />
+        <Route element={<TeacherLayout />} path="/teacher">
+          <Route index element={<TeacherDashboard />} />
+          <Route element={<CreateMissionWizard />} path="missions/new" />
+          <Route element={<MissionReport />} path="missions/:id" />
+          <Route element={<StudentDiagnostic />} path="students/:id" />
+          <Route element={<Navigate replace to="/teacher" />} path="*" />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
 

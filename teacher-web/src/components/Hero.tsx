@@ -12,6 +12,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { type PointerEvent, useRef } from 'react'
+import { Link } from 'react-router-dom'
 
 import './hero.css'
 
@@ -88,10 +89,10 @@ export function Hero() {
           </p>
 
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <button className="cq-button cq-button-primary" type="button">
+            <Link className="cq-button cq-button-primary" to="/teacher/missions/new">
               Create your first mission
               <ArrowRight aria-hidden="true" className="size-4" />
-            </button>
+            </Link>
             <button className="cq-button cq-button-secondary" type="button">
               <Play aria-hidden="true" className="size-4" />
               Experience ClassQuest
