@@ -257,14 +257,24 @@ public static class Level1Builder
 
     private static void BuildPowerModuleArea(Transform propsParent, Transform signageParent)
     {
-        AddCube(propsParent, "PowerModule_Pedestal", new Vector3(-5f, 0.35f, 16f), new Vector3(1.2f, 0.7f, 1.2f), "Frame");
-        AddCube(propsParent, "PowerModule_Placeholder", new Vector3(-5f, 1.05f, 16f), new Vector3(0.55f, 0.55f, 0.55f), "PowerModule");
+        GameObject moduleRoot = CreateChild(propsParent.gameObject, "PowerModule_Pickup");
+        AddCube(moduleRoot.transform, "PowerModule_Pedestal", new Vector3(-5f, 0.35f, 16f), new Vector3(1.2f, 0.7f, 1.2f), "Frame");
+
+        GameObject visualRoot = CreateChild(moduleRoot, "PowerModule_VisualRoot");
+        visualRoot.transform.position = new Vector3(-5f, 1.15f, 16f);
+        AddCube(visualRoot.transform, "PowerModule_Placeholder", new Vector3(-5f, 1.15f, 16f), new Vector3(0.55f, 0.55f, 0.55f), "PowerModule");
+        AddCube(visualRoot.transform, "PowerModule_Core_Glow", new Vector3(-5f, 1.15f, 16f), new Vector3(0.28f, 0.28f, 0.28f), "PowerModuleGlow");
+        Light moduleLight = AddPointLight(moduleRoot.transform, "Light_PowerModule_Glow", new Vector3(-5f, 1.7f, 16f), 3.2f, 4.5f, new Color(1f, 0.88f, 0.25f));
+
+        PowerModulePickup pickup = moduleRoot.AddComponent<PowerModulePickup>();
+        pickup.Configure(null, visualRoot, moduleLight);
         AddLabel(signageParent, "Sign_PowerModule", "POWER MODULE", new Vector3(-5f, 2.2f, 13.95f), Quaternion.Euler(0f, 0f, 0f), 0.3f, "Info");
     }
 
     private static void BuildExitArea(Transform propsParent, Transform signageParent)
     {
         AddCube(propsParent, "LevelExit_Placeholder", new Vector3(0f, 1.5f, 30.65f), new Vector3(3.5f, 3f, 0.2f), "Exit");
+        AddTriggerBox(propsParent, "LevelExit_Trigger", new Vector3(0f, 1.5f, 29f), new Vector3(4.8f, 3f, 5.8f)).AddComponent<LevelExitTrigger>();
         AddLabel(signageParent, "Sign_LevelExit", "LEVEL 1 EXIT", new Vector3(0f, 2.4f, 30.52f), Quaternion.Euler(0f, 180f, 0f), 0.38f, "Exit");
     }
 
@@ -307,14 +317,117 @@ public static class Level1Builder
         FacilityPowerController powerController = Object.FindFirstObjectByType<FacilityPowerController>();
         DoorController door = Object.FindFirstObjectByType<DoorController>();
         PlayerInteraction playerInteraction = Object.FindFirstObjectByType<PlayerInteraction>();
+        PowerModulePickup powerModule = Object.FindFirstObjectByType<PowerModulePickup>();
+        LevelExitTrigger levelExit = Object.FindFirstObjectByType<LevelExitTrigger>();
+        HardwareHudController hardwareHud = CreateHardwareHud();
+        LevelCompletionUI completionUI = CreateLevelCompletionUi();
 
-        if (!terminal || !generator || !powerController || !door || !playerInteraction)
+        if (!terminal || !generator || !powerController || !door || !playerInteraction || !powerModule || !levelExit)
         {
-            Debug.LogWarning("Level1Builder could not fully configure Level1_FlowController. Check generated terminal, generator, power, door, and player objects.");
+            Debug.LogWarning("Level1Builder could not fully configure Level1_FlowController. Check generated terminal, generator, power, door, player, module, and exit objects.");
             return;
         }
 
-        flowController.Configure(terminal, generator, powerController, door, playerInteraction);
+        powerModule.Configure(flowController, null, null);
+        levelExit.Configure(flowController, playerInteraction);
+        flowController.Configure(terminal, generator, powerController, door, playerInteraction, powerModule, levelExit, hardwareHud, completionUI);
+    }
+
+    private static HardwareHudController CreateHardwareHud()
+    {
+        GameObject existingUi = GameObject.Find("UI_Canvas_HardwareHud");
+        if (existingUi)
+        {
+            Object.DestroyImmediate(existingUi);
+        }
+
+        GameObject canvasObject = new GameObject("UI_Canvas_HardwareHud");
+        Canvas canvas = canvasObject.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 10;
+
+        CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1600f, 900f);
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+        scaler.matchWidthOrHeight = 0.5f;
+
+        GameObject panelObject = new GameObject("Panel_HardwareHud");
+        panelObject.transform.SetParent(canvasObject.transform, false);
+        RectTransform panelRect = panelObject.AddComponent<RectTransform>();
+        SetAnchoredRect(panelRect, new Vector2(0f, 1f), new Vector2(225f, -106f), new Vector2(420f, 178f));
+
+        Image panelImage = panelObject.AddComponent<Image>();
+        panelImage.color = new Color(0.01f, 0.03f, 0.04f, 0.68f);
+        panelImage.raycastTarget = false;
+
+        Text title = CreateUiText(panelObject.transform, "Text_HardwareTitle", "SHUTDOWN HARDWARE", 24, FontStyle.Bold, new Color(0.35f, 1f, 0.85f));
+        SetAnchoredRect(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -24f), new Vector2(370f, 32f));
+
+        Text powerStatus = AddHudRow(panelObject.transform, "Power Module", "NOT ACQUIRED", -62f);
+        Text chipStatus = AddHudRow(panelObject.transform, "Authorization Chip", "LOCKED", -100f);
+        Text overrideStatus = AddHudRow(panelObject.transform, "Override Module", "LOCKED", -138f);
+
+        HardwareHudController hud = canvasObject.AddComponent<HardwareHudController>();
+        hud.Configure(panelObject, powerStatus, chipStatus, overrideStatus);
+        return hud;
+    }
+
+    private static LevelCompletionUI CreateLevelCompletionUi()
+    {
+        GameObject existingUi = GameObject.Find("UI_Canvas_LevelComplete");
+        if (existingUi)
+        {
+            Object.DestroyImmediate(existingUi);
+        }
+
+        GameObject canvasObject = new GameObject("UI_Canvas_LevelComplete");
+        Canvas canvas = canvasObject.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 60;
+
+        CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1600f, 900f);
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+        scaler.matchWidthOrHeight = 0.5f;
+
+        canvasObject.AddComponent<GraphicRaycaster>();
+        LevelCompletionUI completionUi = canvasObject.AddComponent<LevelCompletionUI>();
+
+        GameObject panelObject = new GameObject("Panel_LevelComplete");
+        panelObject.transform.SetParent(canvasObject.transform, false);
+        RectTransform panelRect = panelObject.AddComponent<RectTransform>();
+        StretchToParent(panelRect);
+
+        Image panelImage = panelObject.AddComponent<Image>();
+        panelImage.color = new Color(0.015f, 0.035f, 0.04f, 0.96f);
+
+        Text message = CreateUiText(panelObject.transform, "Text_LevelCompleteMessage", string.Empty, 42, FontStyle.Bold, Color.white);
+        SetAnchoredRect(message.rectTransform, new Vector2(0.5f, 0.56f), new Vector2(0f, 40f), new Vector2(1180f, 360f));
+
+        GameObject buttonObject = new GameObject("Button_Continue");
+        buttonObject.transform.SetParent(panelObject.transform, false);
+        RectTransform buttonRect = buttonObject.AddComponent<RectTransform>();
+        SetAnchoredRect(buttonRect, new Vector2(0.5f, 0f), new Vector2(0f, 120f), new Vector2(320f, 86f));
+
+        Image buttonImage = buttonObject.AddComponent<Image>();
+        buttonImage.color = new Color(0.04f, 0.42f, 0.46f, 0.98f);
+
+        Button button = buttonObject.AddComponent<Button>();
+        ColorBlock colors = button.colors;
+        colors.normalColor = new Color(0.04f, 0.42f, 0.46f, 0.98f);
+        colors.highlightedColor = new Color(0.08f, 0.58f, 0.62f, 1f);
+        colors.pressedColor = new Color(0.1f, 0.8f, 0.7f, 1f);
+        colors.selectedColor = colors.highlightedColor;
+        button.colors = colors;
+
+        Text buttonText = CreateUiText(buttonObject.transform, "Text_Continue", "CONTINUE", 36, FontStyle.Bold, Color.white);
+        StretchToParent(buttonText.rectTransform);
+
+        completionUi.Configure(panelObject, message, button);
+        panelObject.SetActive(false);
+        return completionUi;
     }
 
     private class InteractionUiRefs
@@ -525,6 +638,19 @@ public static class Level1Builder
         return button;
     }
 
+    private static Text AddHudRow(Transform parent, string label, string status, float y)
+    {
+        string safeName = label.Replace(" ", string.Empty);
+        Text labelText = CreateUiText(parent, $"Text_{safeName}_Label", label, 22, FontStyle.Normal, Color.white);
+        labelText.alignment = TextAnchor.MiddleLeft;
+        SetAnchoredRect(labelText.rectTransform, new Vector2(0.5f, 1f), new Vector2(-78f, y), new Vector2(220f, 32f));
+
+        Text statusText = CreateUiText(parent, $"Text_{safeName}_Status", status, 21, FontStyle.Bold, new Color(1f, 0.68f, 0.3f));
+        statusText.alignment = TextAnchor.MiddleRight;
+        SetAnchoredRect(statusText.rectTransform, new Vector2(0.5f, 1f), new Vector2(118f, y), new Vector2(160f, 32f));
+        return statusText;
+    }
+
     private static Text CreateUiText(Transform parent, string name, string text, int fontSize, FontStyle fontStyle, Color color)
     {
         GameObject textObject = new GameObject(name);
@@ -584,6 +710,18 @@ public static class Level1Builder
         }
 
         return cube;
+    }
+
+    private static GameObject AddTriggerBox(Transform parent, string name, Vector3 position, Vector3 size)
+    {
+        GameObject trigger = new GameObject(name);
+        trigger.transform.SetParent(parent);
+        trigger.transform.position = position;
+        trigger.transform.localScale = size;
+
+        BoxCollider collider = trigger.AddComponent<BoxCollider>();
+        collider.isTrigger = true;
+        return trigger;
     }
 
     private static TextMesh AddLabel(Transform parent, string name, string text, Vector3 position, Quaternion rotation, float size, string materialKey)
@@ -713,6 +851,7 @@ public static class Level1Builder
         Materials["Terminal"] = GetOrCreateMaterial("M_Terminal_Body", new Color(0.08f, 0.09f, 0.11f));
         Materials["TerminalScreen"] = GetOrCreateMaterial("M_Terminal_Screen", new Color(0.05f, 0.85f, 0.35f));
         Materials["PowerModule"] = GetOrCreateMaterial("M_PowerModule", new Color(1f, 0.82f, 0.2f));
+        Materials["PowerModuleGlow"] = GetOrCreateMaterial("M_PowerModule_Glow", new Color(1f, 0.95f, 0.35f));
         Materials["Exit"] = GetOrCreateMaterial("M_LevelExit_Green", new Color(0.2f, 0.85f, 0.35f));
         Materials["Warning"] = GetOrCreateMaterial("M_Sign_Warning", new Color(1f, 0.25f, 0.18f));
         Materials["Info"] = GetOrCreateMaterial("M_Sign_Info", new Color(0.25f, 0.9f, 1f));

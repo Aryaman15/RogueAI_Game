@@ -116,6 +116,14 @@ namespace RogueAI.Interaction
             SetGameplayInputEnabled(true);
         }
 
+        public void LockGameplayForCompletion()
+        {
+            currentInteractable = null;
+            SetPromptVisible(false);
+            SetStatusVisible(false);
+            SetGameplayInputEnabled(false);
+        }
+
         private void UpdateCurrentTarget()
         {
             IInteractable target = FindInteractableInView();
