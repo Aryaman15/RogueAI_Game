@@ -1,0 +1,460 @@
+.cq-worlds {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-top: 1px solid rgb(38 53 68 / 0.72);
+  background:
+    radial-gradient(circle at 22% 22%, rgb(40 215 197 / 0.09), transparent 30rem),
+    radial-gradient(circle at 78% 62%, rgb(90 167 255 / 0.08), transparent 34rem),
+    linear-gradient(180deg, #070b10 0%, #08121b 54%, #070b10 100%);
+}
+
+.cq-worlds::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  background:
+    linear-gradient(128deg, transparent 0 44%, rgb(40 215 197 / 0.07) 44.12% 44.26%, transparent 44.4% 100%),
+    linear-gradient(48deg, transparent 0 70%, rgb(90 167 255 / 0.06) 70.12% 70.25%, transparent 70.4% 100%);
+  opacity: 0.76;
+}
+
+.cq-worlds h2 {
+  margin-top: 0.6rem;
+  color: var(--cq-color-text-strong);
+  font-size: clamp(2.35rem, 5vw, 4.7rem);
+  font-weight: 760;
+  line-height: 1.02;
+}
+
+.cq-worlds-intro {
+  max-width: 620px;
+  color: var(--cq-color-text-muted);
+  font-size: clamp(1rem, 1.6vw, 1.16rem);
+  line-height: 1.8;
+}
+
+.cq-worlds .cq-world-grid {
+  display: grid;
+  align-items: stretch;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.cq-worlds .cq-future-world-stack {
+  display: grid;
+  height: 560px;
+  min-height: 0;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.cq-worlds .cq-world-card {
+  --world-spotlight-x: 50%;
+  --world-spotlight-y: 35%;
+
+  position: relative;
+  display: grid;
+  align-self: stretch;
+  justify-self: stretch;
+  width: auto;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--cq-color-border);
+  border-radius: var(--cq-radius-md);
+  background:
+    radial-gradient(circle at var(--world-spotlight-x) var(--world-spotlight-y), rgb(40 215 197 / 0.14), transparent 16rem),
+    linear-gradient(145deg, rgb(17 27 37 / 0.94), rgb(8 14 21 / 0.98));
+  box-shadow: var(--cq-shadow-panel);
+  outline: none;
+  inset: auto;
+  padding: 0;
+  transform: none;
+  transition:
+    transform var(--cq-transition-standard),
+    border-color var(--cq-transition-standard),
+    box-shadow var(--cq-transition-standard),
+    filter var(--cq-transition-standard);
+}
+
+.cq-worlds .cq-world-card:hover,
+.cq-worlds .cq-world-card:focus-visible {
+  border-color: rgb(40 215 197 / 0.44);
+  box-shadow: var(--cq-shadow-panel), 0 0 44px rgb(40 215 197 / 0.09);
+  transform: translateY(-6px);
+}
+
+.cq-worlds .cq-world-card.is-coming-soon:hover,
+.cq-worlds .cq-world-card.is-coming-soon:focus-visible {
+  border-color: rgb(90 167 255 / 0.34);
+  box-shadow: var(--cq-shadow-soft), 0 0 34px rgb(90 167 255 / 0.07);
+}
+
+.cq-worlds .cq-world-card-featured {
+  height: 560px;
+  min-height: 0;
+}
+
+.cq-worlds .cq-future-world-stack .cq-world-card {
+  min-height: 0;
+}
+
+.cq-worlds .cq-world-card::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(90deg, rgb(143 164 179 / 0.06) 1px, transparent 1px),
+    linear-gradient(180deg, rgb(143 164 179 / 0.05) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: radial-gradient(circle at var(--world-spotlight-x) var(--world-spotlight-y), black 0 30%, transparent 78%);
+}
+
+.cq-worlds .cq-world-ambient {
+  position: absolute;
+  inset: 0;
+  opacity: 0.86;
+}
+
+.cq-worlds .cq-world-card-rogue .cq-world-ambient {
+  background:
+    radial-gradient(circle at 68% 26%, rgb(40 215 197 / 0.16), transparent 18rem),
+    linear-gradient(135deg, transparent 0 52%, rgb(40 215 197 / 0.1) 52.2% 52.5%, transparent 52.7% 100%);
+}
+
+.cq-worlds .cq-world-card-orbital .cq-world-ambient {
+  background:
+    radial-gradient(circle at 72% 28%, rgb(90 167 255 / 0.18), transparent 15rem),
+    conic-gradient(from 90deg at 78% 28%, transparent 0 24%, rgb(90 167 255 / 0.13) 25% 26%, transparent 27% 100%);
+}
+
+.cq-worlds .cq-world-card-detective .cq-world-ambient {
+  background:
+    radial-gradient(circle at 72% 34%, rgb(40 215 197 / 0.11), transparent 14rem),
+    linear-gradient(120deg, transparent 0 35%, rgb(90 167 255 / 0.1) 35.1% 35.35%, transparent 35.55% 100%);
+}
+
+.cq-worlds .cq-world-card-temple .cq-world-ambient {
+  background:
+    radial-gradient(circle at 74% 32%, rgb(243 179 75 / 0.13), transparent 15rem),
+    linear-gradient(138deg, transparent 0 48%, rgb(243 179 75 / 0.1) 48.1% 48.36%, transparent 48.55% 100%);
+}
+
+.cq-worlds .cq-world-visual {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cq-worlds .cq-world-emblem {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  display: grid;
+  width: 7.5rem;
+  height: 7.5rem;
+  place-items: center;
+  border: 1px solid rgb(40 215 197 / 0.24);
+  border-radius: 999px;
+  color: var(--cq-color-accent);
+  background:
+    radial-gradient(circle, rgb(40 215 197 / 0.12), transparent 66%),
+    rgb(7 11 16 / 0.46);
+  box-shadow: inset 0 0 30px rgb(40 215 197 / 0.06);
+}
+
+.cq-worlds .cq-world-card.is-coming-soon .cq-world-emblem {
+  top: 1rem;
+  right: 1rem;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-color: rgb(90 167 255 / 0.2);
+  color: rgb(143 164 179 / 0.9);
+}
+
+.cq-worlds .cq-world-card-temple .cq-world-emblem {
+  border-color: rgb(243 179 75 / 0.24);
+  color: var(--cq-color-warning);
+}
+
+.cq-worlds .cq-world-emblem span {
+  position: absolute;
+  inset: 0.9rem;
+  border: 1px dashed currentColor;
+  border-radius: inherit;
+  opacity: 0.24;
+}
+
+.cq-worlds .cq-world-lines {
+  position: absolute;
+  right: 2rem;
+  bottom: 2rem;
+  left: 2rem;
+  display: grid;
+  gap: 0.7rem;
+  opacity: 0.42;
+}
+
+.cq-worlds .cq-world-lines span {
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  color: var(--cq-color-accent);
+}
+
+.cq-worlds .cq-world-lines span:nth-child(2) {
+  width: 74%;
+  margin-left: auto;
+  color: var(--cq-color-accent-blue);
+}
+
+.cq-worlds .cq-world-lines span:nth-child(3) {
+  width: 52%;
+  color: var(--cq-color-warning);
+}
+
+.cq-worlds .cq-world-card-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 1.35rem;
+  min-height: 100%;
+  padding: clamp(1.2rem, 2.8vw, 2rem);
+}
+
+.cq-worlds .cq-world-card.is-coming-soon .cq-world-card-content {
+  gap: 0.8rem;
+  padding: 1rem;
+}
+
+.cq-worlds .cq-world-card-featured .cq-world-copy {
+  margin-top: clamp(4rem, 6vw, 6rem);
+}
+
+.cq-worlds .cq-world-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+  max-width: calc(100% - 8.5rem);
+}
+
+.cq-worlds .cq-world-card.is-coming-soon .cq-world-meta {
+  max-width: calc(100% - 5rem);
+}
+
+.cq-worlds .cq-world-meta span,
+.cq-worlds .cq-world-meta strong,
+.cq-worlds .cq-world-footer {
+  border: 1px solid var(--cq-color-border-subtle);
+  border-radius: 999px;
+  background: rgb(7 11 16 / 0.64);
+  color: var(--cq-color-text-muted);
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cq-worlds .cq-world-meta span,
+.cq-worlds .cq-world-meta strong {
+  padding: 0.5rem 0.68rem;
+}
+
+.cq-worlds .cq-world-meta strong {
+  border-color: rgb(40 215 197 / 0.38);
+  color: var(--cq-color-accent);
+}
+
+.cq-worlds .cq-world-card.is-coming-soon .cq-world-meta strong {
+  border-color: rgb(143 164 179 / 0.26);
+  color: var(--cq-color-text-muted);
+}
+
+.cq-worlds .cq-world-card h3 {
+  max-width: 100%;
+  color: var(--cq-color-text-strong);
+  font-size: clamp(2rem, 3vw, 3.5rem);
+  font-weight: 820;
+  line-height: 1;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.cq-worlds .cq-world-card.is-coming-soon h3 {
+  font-size: clamp(1.2rem, 1.8vw, 1.65rem);
+  line-height: 1.05;
+}
+
+.cq-worlds .cq-world-theme {
+  margin-top: 0.75rem;
+  color: var(--cq-color-accent);
+  font-size: clamp(0.9rem, 1.4vw, 1.08rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cq-worlds .cq-world-card.is-coming-soon .cq-world-theme {
+  color: var(--cq-color-text-muted);
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.cq-worlds .cq-world-description {
+  max-width: 620px;
+  overflow: hidden;
+  color: var(--cq-color-text-muted);
+  line-height: 1.75;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--cq-transition-standard),
+    transform var(--cq-transition-standard);
+}
+
+.cq-worlds .cq-world-card-featured .cq-world-description {
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+.cq-worlds .cq-world-card.is-coming-soon .cq-world-description {
+  position: absolute;
+  right: 1rem;
+  bottom: 3.65rem;
+  left: 1rem;
+  max-width: none;
+  border: 1px solid var(--cq-color-border-subtle);
+  border-radius: var(--cq-radius-sm);
+  background: rgb(7 11 16 / 0.88);
+  color: var(--cq-color-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  opacity: 0;
+  padding: 0.7rem;
+  pointer-events: none;
+  transform: translateY(6px);
+}
+
+.cq-worlds .cq-world-card.is-coming-soon:hover .cq-world-description,
+.cq-worlds .cq-world-card.is-coming-soon:focus-visible .cq-world-description {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.cq-worlds .cq-world-footer {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding: 0.58rem 0.74rem;
+}
+
+.cq-worlds .cq-world-card.is-coming-soon .cq-world-footer {
+  font-size: 0.64rem;
+  padding: 0.5rem 0.62rem;
+}
+
+.cq-worlds .cq-world-card.is-available .cq-world-footer {
+  border-color: rgb(40 215 197 / 0.32);
+  color: var(--cq-color-accent);
+}
+
+.cq-worlds-note {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 1.25rem auto 0;
+  border: 1px solid var(--cq-color-border);
+  border-radius: 999px;
+  background: rgb(7 11 16 / 0.68);
+  color: var(--cq-color-text-muted);
+  padding: 0.75rem 1rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.cq-worlds-note svg {
+  color: var(--cq-color-accent);
+  flex: 0 0 auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cq-worlds .cq-world-emblem span {
+    animation: cq-world-emblem-spin 12s linear infinite;
+  }
+}
+
+@keyframes cq-world-emblem-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cq-worlds .cq-world-card,
+  .cq-worlds .cq-world-description,
+  .cq-worlds .cq-world-emblem span {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (max-width: 980px) {
+  .cq-worlds .cq-world-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cq-worlds .cq-future-world-stack {
+    height: auto;
+    min-height: auto;
+    grid-template-rows: none;
+  }
+
+  .cq-worlds .cq-world-card-featured {
+    height: auto;
+    min-height: auto;
+  }
+
+  .cq-worlds .cq-world-card-featured .cq-world-copy {
+    margin-top: 4rem;
+  }
+}
+
+@media (max-width: 620px) {
+  .cq-worlds .cq-world-card,
+  .cq-worlds .cq-world-card-featured,
+  .cq-worlds .cq-world-card.is-coming-soon {
+    min-height: auto;
+  }
+
+  .cq-worlds .cq-world-emblem {
+    width: 5.75rem;
+    height: 5.75rem;
+  }
+
+  .cq-worlds .cq-world-card-content {
+    gap: 1.5rem;
+    padding-top: 1.2rem;
+  }
+
+  .cq-worlds .cq-world-card-featured .cq-world-copy {
+    margin-top: 1.5rem;
+  }
+
+  .cq-worlds .cq-world-meta {
+    max-width: 100%;
+  }
+
+  .cq-worlds-note {
+    align-items: flex-start;
+    border-radius: var(--cq-radius-md);
+  }
+}

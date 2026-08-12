@@ -1,0 +1,26 @@
+.cq-tech-grid {
+  background-image:
+    linear-gradient(rgb(40 215 197 / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(90 167 255 / 0.055) 1px, transparent 1px);
+  background-position: center top;
+  background-size: 48px 48px;
+}
+
+.cq-radial-glow {
+  position: relative;
+}
+
+.cq-radial-glow::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background:
+    radial-gradient(circle at 18% 18%, rgb(40 215 197 / 0.16), transparent 30rem),
+    radial-gradient(circle at 82% 35%, rgb(90 167 255 / 0.11), transparent 34rem);
+  mask-image: linear-gradient(to bottom, black 0%, black 72%, transparent 100%);
+}
+
+.cq-radial-glow > * {
+  position: relative;
+}

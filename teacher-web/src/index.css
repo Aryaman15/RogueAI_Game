@@ -1,0 +1,28 @@
+@import './styles/tokens.css';
+@import 'tailwindcss';
+@import './styles/base.css';
+@import './styles/effects.css';
+
+@theme inline {
+  --color-cq-background: var(--cq-color-background);
+  --color-cq-surface: var(--cq-color-surface);
+  --color-cq-surface-elevated: var(--cq-color-surface-elevated);
+  --color-cq-border: var(--cq-color-border);
+  --color-cq-border-subtle: var(--cq-color-border-subtle);
+  --color-cq-text: var(--cq-color-text);
+  --color-cq-text-muted: var(--cq-color-text-muted);
+  --color-cq-text-strong: var(--cq-color-text-strong);
+  --color-cq-accent: var(--cq-color-accent);
+  --color-cq-accent-blue: var(--cq-color-accent-blue);
+  --color-cq-warning: var(--cq-color-warning);
+
+  --radius-cq-xs: var(--cq-radius-xs);
+  --radius-cq-sm: var(--cq-radius-sm);
+  --radius-cq-md: var(--cq-radius-md);
+
+  --shadow-cq-soft: var(--cq-shadow-soft);
+  --shadow-cq-panel: var(--cq-shadow-panel);
+
+  --font-sans: var(--cq-font-sans);
+  --font-mono: var(--cq-font-mono);
+}
