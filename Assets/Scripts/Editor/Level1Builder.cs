@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using RogueAI.Interaction;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public static class Level1Builder
 {
@@ -56,6 +58,7 @@ public static class Level1Builder
         RemoveStarterPlaygroundEnvironment();
         PreparePreservedPlayerSetup();
         BuildGreyboxLevel();
+        ConfigureInteractionSystem();
         AddLevelToBuildSettingsPreservingPlayground();
 
         EditorSceneManager.MarkSceneDirty(scene);
@@ -184,10 +187,42 @@ public static class Level1Builder
     {
         AddCube(propsParent, "Generator_Placeholder_Base", new Vector3(12.3f, 0.55f, 3f), new Vector3(2.6f, 1.1f, 1.5f), "Generator");
         AddCube(propsParent, "Generator_Placeholder_Core", new Vector3(12.3f, 1.45f, 3f), new Vector3(1.5f, 0.7f, 1f), "GeneratorAccent");
-        AddCube(propsParent, "Terminal_Desk_Placeholder", new Vector3(8.4f, 0.45f, 1.2f), new Vector3(1.5f, 0.9f, 0.7f), "Terminal");
-        AddCube(propsParent, "Terminal_Monitor_Placeholder", new Vector3(8.4f, 1.25f, 0.85f), new Vector3(1.2f, 0.75f, 0.12f), "TerminalScreen");
+
+        GameObject terminalRoot = CreateChild(propsParent.gameObject, "Terminal_Placeholder");
+        terminalRoot.AddComponent<TerminalInteractable>();
+        AddCube(terminalRoot.transform, "Terminal_Desk_Placeholder", new Vector3(8.4f, 0.45f, 1.2f), new Vector3(1.5f, 0.9f, 0.7f), "Terminal");
+        AddCube(terminalRoot.transform, "Terminal_Monitor_Placeholder", new Vector3(8.4f, 1.25f, 0.85f), new Vector3(1.2f, 0.75f, 0.12f), "TerminalScreen");
+
         AddLabel(signageParent, "Sign_GeneratorRoom", "GENERATOR ROOM", new Vector3(3.9f, 2.25f, 0.7f), Quaternion.Euler(0f, 0f, 0f), 0.35f, "Info");
         AddLabel(signageParent, "Sign_RestorePower", "RESTORE\nSECTOR POWER", new Vector3(8.4f, 2.25f, 0.68f), Quaternion.Euler(0f, 0f, 0f), 0.32f, "Info");
+    }
+
+    private static void ConfigureInteractionSystem()
+    {
+        GameObject player = GameObject.Find("PlayerCapsule");
+        Camera mainCamera = Camera.main;
+
+        if (!player || !mainCamera)
+        {
+            Debug.LogWarning("Level1Builder could not configure interaction because PlayerCapsule or MainCamera was not found.");
+            return;
+        }
+
+        GameObject existingUi = GameObject.Find("UI_Canvas_Interaction");
+        if (existingUi)
+        {
+            Object.DestroyImmediate(existingUi);
+        }
+
+        InteractionUiRefs uiRefs = CreateInteractionUi();
+
+        PlayerInteraction playerInteraction = player.GetComponent<PlayerInteraction>();
+        if (!playerInteraction)
+        {
+            playerInteraction = player.AddComponent<PlayerInteraction>();
+        }
+
+        playerInteraction.Configure(mainCamera, uiRefs.PromptRoot, uiRefs.PromptText, uiRefs.InteractButton, uiRefs.StatusRoot, uiRefs.StatusText);
     }
 
     private static void BuildPowerModuleArea(Transform propsParent, Transform signageParent)
@@ -220,6 +255,117 @@ public static class Level1Builder
         AddPointLight(parent, "Light_GeneratorRoom", new Vector3(11f, 2.6f, 3f), 4f, 9f, new Color(0.7f, 0.9f, 1f));
         AddPointLight(parent, "Light_SecuredCorridor", new Vector3(0f, 2.6f, 17f), 3f, 9f, new Color(0.8f, 0.95f, 1f));
         AddPointLight(parent, "Light_Exit", new Vector3(0f, 2.6f, 28.5f), 3.5f, 8f, new Color(0.65f, 1f, 0.75f));
+    }
+
+    private class InteractionUiRefs
+    {
+        public GameObject PromptRoot;
+        public Text PromptText;
+        public Button InteractButton;
+        public GameObject StatusRoot;
+        public Text StatusText;
+    }
+
+    private static InteractionUiRefs CreateInteractionUi()
+    {
+        GameObject canvasObject = new GameObject("UI_Canvas_Interaction");
+        Canvas canvas = canvasObject.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 20;
+
+        CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1600f, 900f);
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+        scaler.matchWidthOrHeight = 0.5f;
+
+        canvasObject.AddComponent<GraphicRaycaster>();
+
+        GameObject buttonObject = new GameObject("Button_Interact");
+        buttonObject.transform.SetParent(canvasObject.transform, false);
+        RectTransform buttonRect = buttonObject.AddComponent<RectTransform>();
+        SetAnchoredRect(buttonRect, new Vector2(0.5f, 0f), new Vector2(0f, 105f), new Vector2(300f, 92f));
+
+        Image buttonImage = buttonObject.AddComponent<Image>();
+        buttonImage.color = new Color(0.02f, 0.08f, 0.10f, 0.9f);
+
+        Button button = buttonObject.AddComponent<Button>();
+        ColorBlock colors = button.colors;
+        colors.normalColor = new Color(0.02f, 0.08f, 0.10f, 0.9f);
+        colors.highlightedColor = new Color(0.06f, 0.28f, 0.32f, 0.95f);
+        colors.pressedColor = new Color(0.04f, 0.55f, 0.62f, 1f);
+        colors.selectedColor = colors.highlightedColor;
+        button.colors = colors;
+
+        Text promptText = CreateUiText(buttonObject.transform, "Text_Interact", "INTERACT", 42, FontStyle.Bold, Color.white);
+        StretchToParent(promptText.rectTransform);
+
+        GameObject statusObject = new GameObject("Status_TerminalMessage");
+        statusObject.transform.SetParent(canvasObject.transform, false);
+        RectTransform statusRect = statusObject.AddComponent<RectTransform>();
+        SetAnchoredRect(statusRect, new Vector2(0.5f, 1f), new Vector2(0f, -92f), new Vector2(560f, 88f));
+
+        Image statusImage = statusObject.AddComponent<Image>();
+        statusImage.color = new Color(0.01f, 0.04f, 0.05f, 0.86f);
+
+        Text statusText = CreateUiText(statusObject.transform, "Text_Status", "TERMINAL CONNECTED", 40, FontStyle.Bold, new Color(0.25f, 1f, 0.55f));
+        StretchToParent(statusText.rectTransform);
+
+        buttonObject.SetActive(false);
+        statusObject.SetActive(false);
+
+        return new InteractionUiRefs
+        {
+            PromptRoot = buttonObject,
+            PromptText = promptText,
+            InteractButton = button,
+            StatusRoot = statusObject,
+            StatusText = statusText
+        };
+    }
+
+    private static Text CreateUiText(Transform parent, string name, string text, int fontSize, FontStyle fontStyle, Color color)
+    {
+        GameObject textObject = new GameObject(name);
+        textObject.transform.SetParent(parent, false);
+
+        Text uiText = textObject.AddComponent<Text>();
+        uiText.text = text;
+        uiText.font = GetBuiltinFont();
+        uiText.fontSize = fontSize;
+        uiText.fontStyle = fontStyle;
+        uiText.color = color;
+        uiText.alignment = TextAnchor.MiddleCenter;
+        uiText.raycastTarget = false;
+        return uiText;
+    }
+
+    private static Font GetBuiltinFont()
+    {
+        Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (!font)
+        {
+            font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        }
+
+        return font;
+    }
+
+    private static void SetAnchoredRect(RectTransform rect, Vector2 anchor, Vector2 anchoredPosition, Vector2 size)
+    {
+        rect.anchorMin = anchor;
+        rect.anchorMax = anchor;
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = anchoredPosition;
+        rect.sizeDelta = size;
+    }
+
+    private static void StretchToParent(RectTransform rect)
+    {
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
     }
 
     private static GameObject AddCube(Transform parent, string name, Vector3 position, Vector3 scale, string materialKey)
