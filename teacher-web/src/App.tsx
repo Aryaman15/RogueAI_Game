@@ -3,6 +3,7 @@ import { ExperienceClassQuest } from './components/ExperienceClassQuest'
 import { HowClassQuestWorks } from './components/HowClassQuestWorks'
 import { ProblemSection } from './components/ProblemSection'
 import { ClassQuestWorlds } from './components/ClassQuestWorlds'
+import { FinalCtaFooter } from './components/FinalCtaFooter'
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <ProblemSection />
       <HowClassQuestWorks />
       <ClassQuestWorlds />
+      <FinalCtaFooter />
     </main>
   )
 }
