@@ -1,4 +1,6 @@
 using System.Collections;
+using RogueAI.Challenges;
+using StarterAssets;
 using UnityEngine;
 using UnityEngine.UI;
 #if ENABLE_INPUT_SYSTEM
@@ -21,8 +23,16 @@ namespace RogueAI.Interaction
         [SerializeField] private GameObject statusRoot;
         [SerializeField] private Text statusText;
 
+        [Header("Gameplay Input Lock")]
+        [SerializeField] private FirstPersonController firstPersonController;
+        [SerializeField] private StarterAssetsInputs starterAssetsInputs;
+        [SerializeField] private GameObject gameplayTouchControls;
+
         private IInteractable currentInteractable;
         private Coroutine statusRoutine;
+        private bool terminalChallengeOpen;
+        private CursorLockMode previousCursorLockMode;
+        private bool previousCursorVisible;
 
         public void Configure(Camera targetCamera, GameObject prompt, Text promptLabel, Button button, GameObject status, Text statusLabel)
         {
@@ -32,6 +42,13 @@ namespace RogueAI.Interaction
             interactButton = button;
             statusRoot = status;
             statusText = statusLabel;
+        }
+
+        public void ConfigureGameplayLock(FirstPersonController controller, StarterAssetsInputs inputs, GameObject touchControls)
+        {
+            firstPersonController = controller;
+            starterAssetsInputs = inputs;
+            gameplayTouchControls = touchControls;
         }
 
         private void Awake()
@@ -53,6 +70,11 @@ namespace RogueAI.Interaction
 
         private void Update()
         {
+            if (terminalChallengeOpen)
+            {
+                return;
+            }
+
             UpdateCurrentTarget();
 
 #if ENABLE_INPUT_SYSTEM
@@ -71,6 +93,27 @@ namespace RogueAI.Interaction
             }
 
             statusRoutine = StartCoroutine(ShowStatusRoutine(message, seconds));
+        }
+
+        public void BeginTerminalChallenge(TerminalChallengeUI challengeUI, ChallengeData challengeData)
+        {
+            if (!challengeUI || challengeData == null)
+            {
+                return;
+            }
+
+            terminalChallengeOpen = true;
+            currentInteractable = null;
+            SetPromptVisible(false);
+            SetStatusVisible(false);
+            SetGameplayInputEnabled(false);
+            challengeUI.Open(challengeData, this);
+        }
+
+        public void EndTerminalChallenge()
+        {
+            SetGameplayInputEnabled(true);
+            terminalChallengeOpen = false;
         }
 
         private void UpdateCurrentTarget()
@@ -160,6 +203,48 @@ namespace RogueAI.Interaction
             {
                 statusRoot.SetActive(visible);
             }
+        }
+
+        private void SetGameplayInputEnabled(bool enabled)
+        {
+            if (!enabled)
+            {
+                previousCursorLockMode = Cursor.lockState;
+                previousCursorVisible = Cursor.visible;
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+                ClearStarterAssetInputs();
+            }
+
+            if (firstPersonController)
+            {
+                firstPersonController.enabled = enabled;
+            }
+
+            if (gameplayTouchControls)
+            {
+                gameplayTouchControls.SetActive(enabled);
+            }
+
+            if (enabled)
+            {
+                ClearStarterAssetInputs();
+                Cursor.lockState = previousCursorLockMode;
+                Cursor.visible = previousCursorVisible;
+            }
+        }
+
+        private void ClearStarterAssetInputs()
+        {
+            if (!starterAssetsInputs)
+            {
+                return;
+            }
+
+            starterAssetsInputs.MoveInput(Vector2.zero);
+            starterAssetsInputs.LookInput(Vector2.zero);
+            starterAssetsInputs.JumpInput(false);
+            starterAssetsInputs.SprintInput(false);
         }
     }
 }

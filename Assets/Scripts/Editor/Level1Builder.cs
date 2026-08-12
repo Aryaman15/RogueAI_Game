@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using RogueAI.Challenges;
 using RogueAI.Interaction;
+using StarterAssets;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -215,6 +217,7 @@ public static class Level1Builder
         }
 
         InteractionUiRefs uiRefs = CreateInteractionUi();
+        TerminalChallengeUI challengeUI = CreateTerminalChallengeUi();
 
         PlayerInteraction playerInteraction = player.GetComponent<PlayerInteraction>();
         if (!playerInteraction)
@@ -223,6 +226,20 @@ public static class Level1Builder
         }
 
         playerInteraction.Configure(mainCamera, uiRefs.PromptRoot, uiRefs.PromptText, uiRefs.InteractButton, uiRefs.StatusRoot, uiRefs.StatusText);
+        playerInteraction.ConfigureGameplayLock(
+            player.GetComponent<FirstPersonController>(),
+            player.GetComponent<StarterAssetsInputs>(),
+            GameObject.Find("UI_Canvas_StarterAssetsInputs_TouchZones"));
+
+        GameObject terminalObject = GameObject.Find("Terminal_Placeholder");
+        TerminalInteractable terminal = terminalObject ? terminalObject.GetComponent<TerminalInteractable>() : null;
+        if (!terminal)
+        {
+            Debug.LogWarning("Level1Builder could not configure terminal challenge because Terminal_Placeholder was not found.");
+            return;
+        }
+
+        terminal.Configure(CreateLevel1ChallengeData(), challengeUI);
     }
 
     private static void BuildPowerModuleArea(Transform propsParent, Transform signageParent)
@@ -322,6 +339,147 @@ public static class Level1Builder
             StatusRoot = statusObject,
             StatusText = statusText
         };
+    }
+
+    private static ChallengeData CreateLevel1ChallengeData()
+    {
+        return new ChallengeData
+        {
+            challengeId = "level1_generator_python_range",
+            title = "GENERATOR CONTROL TERMINAL",
+            statusText = "POWER GRID OFFLINE\nMANUAL OVERRIDE REQUIRED",
+            question = "What is the output of the following Python code?",
+            codeSnippet = "for i in range(1, 4):\n    print(i)",
+            expectedAnswer = "1 2 3",
+            concept = "Python for loops and range",
+            type = "short_answer"
+        };
+    }
+
+    private static TerminalChallengeUI CreateTerminalChallengeUi()
+    {
+        GameObject existingUi = GameObject.Find("UI_Canvas_TerminalChallenge");
+        if (existingUi)
+        {
+            Object.DestroyImmediate(existingUi);
+        }
+
+        GameObject canvasObject = new GameObject("UI_Canvas_TerminalChallenge");
+        Canvas canvas = canvasObject.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 40;
+
+        CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1600f, 900f);
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+        scaler.matchWidthOrHeight = 0.5f;
+
+        canvasObject.AddComponent<GraphicRaycaster>();
+
+        TerminalChallengeUI challengeUI = canvasObject.AddComponent<TerminalChallengeUI>();
+
+        GameObject panelObject = new GameObject("Panel_TerminalChallenge");
+        panelObject.transform.SetParent(canvasObject.transform, false);
+        RectTransform panelRect = panelObject.AddComponent<RectTransform>();
+        StretchToParent(panelRect);
+
+        Image panelImage = panelObject.AddComponent<Image>();
+        panelImage.color = new Color(0.015f, 0.03f, 0.04f, 0.96f);
+
+        Text title = CreateUiText(panelObject.transform, "Text_Title", "GENERATOR CONTROL TERMINAL", 44, FontStyle.Bold, new Color(0.35f, 1f, 0.85f));
+        SetAnchoredRect(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -48f), new Vector2(1120f, 62f));
+
+        Text status = CreateUiText(panelObject.transform, "Text_SystemStatus", "POWER GRID OFFLINE\nMANUAL OVERRIDE REQUIRED", 26, FontStyle.Bold, new Color(1f, 0.58f, 0.32f));
+        SetAnchoredRect(status.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -115f), new Vector2(920f, 76f));
+
+        Text question = CreateUiText(panelObject.transform, "Text_Question", "What is the output of the following Python code?", 30, FontStyle.Normal, Color.white);
+        SetAnchoredRect(question.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -190f), new Vector2(1100f, 52f));
+
+        GameObject codePanel = new GameObject("Panel_CodeSnippet");
+        codePanel.transform.SetParent(panelObject.transform, false);
+        RectTransform codePanelRect = codePanel.AddComponent<RectTransform>();
+        SetAnchoredRect(codePanelRect, new Vector2(0.5f, 1f), new Vector2(0f, -292f), new Vector2(940f, 116f));
+
+        Image codePanelImage = codePanel.AddComponent<Image>();
+        codePanelImage.color = new Color(0f, 0f, 0f, 0.58f);
+
+        Text code = CreateUiText(codePanel.transform, "Text_CodeSnippet", "for i in range(1, 4):\n    print(i)", 32, FontStyle.Bold, new Color(0.88f, 1f, 0.9f));
+        code.alignment = TextAnchor.MiddleLeft;
+        RectTransform codeRect = code.rectTransform;
+        codeRect.anchorMin = Vector2.zero;
+        codeRect.anchorMax = Vector2.one;
+        codeRect.offsetMin = new Vector2(28f, 8f);
+        codeRect.offsetMax = new Vector2(-28f, -8f);
+
+        InputField answerInput = CreateAnswerInput(panelObject.transform);
+        Button executeButton = CreateExecuteButton(panelObject.transform);
+
+        Text feedback = CreateUiText(panelObject.transform, "Text_Feedback", string.Empty, 38, FontStyle.Bold, new Color(0.25f, 1f, 0.55f));
+        SetAnchoredRect(feedback.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, -268f), new Vector2(840f, 58f));
+
+        challengeUI.Configure(panelObject, title, status, question, code, answerInput, executeButton, feedback);
+        panelObject.SetActive(false);
+        return challengeUI;
+    }
+
+    private static InputField CreateAnswerInput(Transform parent)
+    {
+        GameObject inputObject = new GameObject("Input_Answer");
+        inputObject.transform.SetParent(parent, false);
+        RectTransform inputRect = inputObject.AddComponent<RectTransform>();
+        SetAnchoredRect(inputRect, new Vector2(0.5f, 0.5f), new Vector2(-175f, -168f), new Vector2(620f, 74f));
+
+        Image inputImage = inputObject.AddComponent<Image>();
+        inputImage.color = new Color(0.94f, 0.98f, 1f, 0.96f);
+
+        InputField inputField = inputObject.AddComponent<InputField>();
+        inputField.lineType = InputField.LineType.SingleLine;
+        inputField.characterLimit = 80;
+        inputField.shouldHideMobileInput = false;
+
+        Text text = CreateUiText(inputObject.transform, "Text_InputValue", string.Empty, 34, FontStyle.Normal, Color.black);
+        text.alignment = TextAnchor.MiddleLeft;
+        RectTransform textRect = text.rectTransform;
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = new Vector2(24f, 0f);
+        textRect.offsetMax = new Vector2(-24f, 0f);
+
+        Text placeholder = CreateUiText(inputObject.transform, "Text_Placeholder", "Enter answer, e.g. 1 2 3", 30, FontStyle.Italic, new Color(0.25f, 0.29f, 0.32f, 0.75f));
+        placeholder.alignment = TextAnchor.MiddleLeft;
+        RectTransform placeholderRect = placeholder.rectTransform;
+        placeholderRect.anchorMin = Vector2.zero;
+        placeholderRect.anchorMax = Vector2.one;
+        placeholderRect.offsetMin = new Vector2(24f, 0f);
+        placeholderRect.offsetMax = new Vector2(-24f, 0f);
+
+        inputField.textComponent = text;
+        inputField.placeholder = placeholder;
+        return inputField;
+    }
+
+    private static Button CreateExecuteButton(Transform parent)
+    {
+        GameObject buttonObject = new GameObject("Button_Execute");
+        buttonObject.transform.SetParent(parent, false);
+        RectTransform buttonRect = buttonObject.AddComponent<RectTransform>();
+        SetAnchoredRect(buttonRect, new Vector2(0.5f, 0.5f), new Vector2(315f, -168f), new Vector2(260f, 78f));
+
+        Image buttonImage = buttonObject.AddComponent<Image>();
+        buttonImage.color = new Color(0.04f, 0.42f, 0.46f, 0.98f);
+
+        Button button = buttonObject.AddComponent<Button>();
+        ColorBlock colors = button.colors;
+        colors.normalColor = new Color(0.04f, 0.42f, 0.46f, 0.98f);
+        colors.highlightedColor = new Color(0.08f, 0.58f, 0.62f, 1f);
+        colors.pressedColor = new Color(0.1f, 0.8f, 0.7f, 1f);
+        colors.selectedColor = colors.highlightedColor;
+        button.colors = colors;
+
+        Text label = CreateUiText(buttonObject.transform, "Text_Execute", "EXECUTE", 36, FontStyle.Bold, Color.white);
+        StretchToParent(label.rectTransform);
+        return button;
     }
 
     private static Text CreateUiText(Transform parent, string name, string text, int fontSize, FontStyle fontStyle, Color color)
