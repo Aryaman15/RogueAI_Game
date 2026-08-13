@@ -6,6 +6,7 @@ namespace RogueAI.Challenges
     public class ChallengeData
     {
         public string challengeId;
+        public string slotId;
         public string title;
         public string statusText;
         public string question;

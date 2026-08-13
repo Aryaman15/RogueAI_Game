@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Text.RegularExpressions;
+using RogueAI.ClassQuest;
 using RogueAI.Interaction;
 using UnityEngine;
 using UnityEngine.Events;
@@ -36,6 +37,7 @@ namespace RogueAI.Challenges
         private PlayerInteraction playerInteraction;
         private bool completed;
         private int attemptCount;
+        private float openedAt;
         private Coroutine closeRoutine;
 
         public bool IsCompleted => completed;
@@ -76,6 +78,8 @@ namespace RogueAI.Challenges
         {
             challengeData = data;
             playerInteraction = player;
+            attemptCount = 0;
+            openedAt = Time.realtimeSinceStartup;
 
             if (closeRoutine != null)
             {
@@ -124,8 +128,18 @@ namespace RogueAI.Challenges
 
             attemptCount++;
             string submitted = answerInput ? answerInput.text : string.Empty;
+            bool correct = NormalizeAnswer(submitted) == NormalizeAnswer(challengeData.expectedAnswer);
+            float timeTakenSeconds = Time.realtimeSinceStartup - openedAt;
 
-            if (NormalizeAnswer(submitted) != NormalizeAnswer(challengeData.expectedAnswer))
+            ClassQuestAttemptReporter.ReportAttempt(
+                this,
+                challengeData,
+                submitted,
+                correct,
+                attemptCount,
+                timeTakenSeconds);
+
+            if (!correct)
             {
                 if (feedbackText)
                 {

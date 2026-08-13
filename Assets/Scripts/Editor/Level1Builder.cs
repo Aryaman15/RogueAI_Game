@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using RogueAI.Challenges;
+using RogueAI.ClassQuest;
 using RogueAI.Interaction;
 using RogueAI.Level;
 using StarterAssets;
@@ -49,6 +50,7 @@ public static class Level1Builder
         EnsureFolder("Assets", "Scripts");
         EnsureFolder("Assets/Scripts", "Editor");
         EnsureFolder("Assets/Scripts", "Level");
+        EnsureFolder("Assets/Scripts", "ClassQuest");
         EnsureFolder("Assets", "Level1");
         EnsureFolder("Assets/Level1", "Materials");
 
@@ -311,6 +313,7 @@ public static class Level1Builder
     {
         GameObject flowObject = new GameObject("Level1_FlowController");
         Level1FlowController flowController = flowObject.AddComponent<Level1FlowController>();
+        EnsureClassQuestApiConfig();
 
         TerminalInteractable terminal = Object.FindFirstObjectByType<TerminalInteractable>();
         GeneratorController generator = Object.FindFirstObjectByType<GeneratorController>();
@@ -502,6 +505,7 @@ public static class Level1Builder
         return new ChallengeData
         {
             challengeId = "level1_generator_python_range",
+            slotId = "generator-terminal",
             title = "GENERATOR CONTROL TERMINAL",
             statusText = "POWER GRID OFFLINE\nMANUAL OVERRIDE REQUIRED",
             question = "What is the output of the following Python code?",
@@ -577,6 +581,17 @@ public static class Level1Builder
         challengeUI.Configure(panelObject, title, status, question, code, answerInput, executeButton, feedback);
         panelObject.SetActive(false);
         return challengeUI;
+    }
+
+    private static void EnsureClassQuestApiConfig()
+    {
+        if (Object.FindFirstObjectByType<ClassQuestApiConfig>())
+        {
+            return;
+        }
+
+        GameObject configObject = new GameObject("ClassQuest_ApiConfig");
+        configObject.AddComponent<ClassQuestApiConfig>();
     }
 
     private static InputField CreateAnswerInput(Transform parent)
