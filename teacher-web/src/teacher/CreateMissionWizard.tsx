@@ -19,8 +19,9 @@ import {
 } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
+import { ApiError } from '../api/client'
+import { createMission } from '../api/missions'
 import { getSlotForMapping, mapChallengesToMission } from '../data/missionMapper'
-import { publishMission } from '../data/missionStore'
 import { classes, mapConfigs, worlds } from '../data/mockData'
 import type { Challenge, ChallengeType, Mission, MissionMapping } from '../data/models'
 
@@ -65,6 +66,7 @@ const initialDetails = {
 }
 
 type BuildState = 'idle' | 'building' | 'ready'
+type PublishState = 'idle' | 'deploying' | 'failed'
 
 function createEmptyQuestion(): Challenge {
   return {
@@ -95,6 +97,8 @@ export function CreateMissionWizard() {
   const [buildState, setBuildState] = useState<BuildState>('idle')
   const [buildStage, setBuildStage] = useState(-1)
   const [publishedMission, setPublishedMission] = useState<Mission | null>(null)
+  const [publishState, setPublishState] = useState<PublishState>('idle')
+  const [publishError, setPublishError] = useState('')
   const [copied, setCopied] = useState(false)
 
   const selectedWorld = worlds.find((world) => world.id === selectedWorldId) ?? availableWorld
@@ -214,17 +218,32 @@ export function CreateMissionWizard() {
     )
   }
 
-  function publishCurrentMission() {
-    const mission = publishMission({
-      ...details,
-      worldId: selectedWorld.id,
-      worldName: selectedWorld.name,
-      mapId: selectedMap.id,
-      mapName: selectedMap.name,
-      challenges,
-      mappings,
-    })
-    setPublishedMission(mission)
+  async function publishCurrentMission() {
+    setPublishState('deploying')
+    setPublishError('')
+
+    try {
+      const mission = await createMission({
+        ...details,
+        worldId: selectedWorld.id,
+        mapId: selectedMap.id,
+        challenges,
+      })
+
+      setPublishedMission(mission)
+      setPublishState('idle')
+    } catch (error) {
+      setPublishState('failed')
+      setPublishError(
+        error instanceof ApiError
+          ? error.message
+          : 'Could not reach ClassQuest Mission Server.',
+      )
+    }
+  }
+
+  function tryPublishAgain() {
+    void publishCurrentMission()
   }
 
   async function copyCode() {
@@ -239,12 +258,13 @@ export function CreateMissionWizard() {
   if (publishedMission) {
     return (
       <section className="cq-app-card cq-app-card-pad cq-deployed">
-        <p className="cq-app-eyebrow">Mission Deployed</p>
+        <p className="cq-app-eyebrow">MISSION DEPLOYED</p>
         <h1 className="cq-app-title">{publishedMission.name}</h1>
         <p className="cq-app-subtitle mx-auto">
           {publishedMission.worldName} - {publishedMission.mapName}
         </p>
 
+        <p className="cq-mini-label mt-5">Mission Code</p>
         <div className="cq-mission-code">{publishedMission.missionCode}</div>
 
         <div className="cq-action-row justify-center">
@@ -632,6 +652,28 @@ export function CreateMissionWizard() {
                 </div>
               </div>
             </div>
+
+            {publishState === 'deploying' ? (
+              <div className="cq-app-card cq-app-card-pad cq-build-panel mt-4">
+                <p className="cq-app-eyebrow">DEPLOYING MISSION...</p>
+                <h3>Publishing mission to ClassQuest Mission Server.</h3>
+              </div>
+            ) : null}
+
+            {publishState === 'failed' ? (
+              <div className="cq-app-card cq-app-card-pad cq-deploy-error mt-4" role="alert">
+                <p className="cq-app-eyebrow">MISSION DEPLOYMENT FAILED</p>
+                <h3>Could not reach ClassQuest Mission Server.</h3>
+                {publishError ? <p className="mt-2 text-cq-text-muted">{publishError}</p> : null}
+                <button
+                  className="cq-app-button cq-app-button-primary mt-4"
+                  onClick={tryPublishAgain}
+                  type="button"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : null}
 
@@ -669,12 +711,14 @@ export function CreateMissionWizard() {
           ) : (
             <button
               className="cq-app-button cq-app-button-primary"
-              disabled={mappings.length === 0}
-              onClick={publishCurrentMission}
+              disabled={mappings.length === 0 || publishState === 'deploying'}
+              onClick={() => {
+                void publishCurrentMission()
+              }}
               type="button"
             >
               <Rocket aria-hidden="true" className="size-4" />
-              Publish Mission
+              {publishState === 'deploying' ? 'Deploying Mission...' : 'Publish Mission'}
             </button>
           )}
         </div>

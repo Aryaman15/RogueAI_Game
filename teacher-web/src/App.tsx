@@ -14,6 +14,7 @@ function App() {
         <Route element={<LandingPage />} path="/" />
         <Route element={<TeacherLayout />} path="/teacher">
           <Route index element={<TeacherDashboard />} />
+          <Route element={<TeacherDashboard />} path="missions" />
           <Route element={<CreateMissionWizard />} path="missions/new" />
           <Route element={<MissionReport />} path="missions/:id" />
           <Route element={<StudentDiagnostic />} path="students/:id" />

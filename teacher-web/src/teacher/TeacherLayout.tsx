@@ -13,9 +13,9 @@ import './teacher.css'
 
 const navItems = [
   { label: 'Overview', to: '/teacher', icon: LayoutDashboard, end: true },
-  { label: 'Missions', to: '/teacher/missions/mission-python-loops', icon: LibraryBig },
+  { label: 'Missions', to: '/teacher/missions', icon: LibraryBig },
   { label: 'Students', to: '/teacher/students/student-riya-sharma', icon: Users },
-  { label: 'Insights', to: '/teacher/missions/mission-python-loops', icon: BrainCircuit },
+  { label: 'Insights', to: '/teacher/missions', icon: BrainCircuit },
 ]
 
 export function TeacherLayout() {
@@ -50,8 +50,8 @@ export function TeacherLayout() {
 
           <div className="cq-sidebar-note">
             <p>
-              Prototype mode uses local mission data and mock learning
-              intelligence for judge walkthroughs.
+              Prototype mode uses backend mission publishing with mock
+              student diagnostics for judge walkthroughs.
             </p>
             <p className="mt-3 flex items-center gap-2 text-cq-accent">
               <BarChart3 aria-hidden="true" className="size-4" />
