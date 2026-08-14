@@ -33,6 +33,8 @@ namespace RogueAI.Interaction
         private bool terminalChallengeOpen;
         private CursorLockMode previousCursorLockMode;
         private bool previousCursorVisible;
+        private bool previousStarterCursorLocked;
+        private bool previousStarterCursorInputForLook;
 
         public void Configure(Camera targetCamera, GameObject prompt, Text promptLabel, Button button, GameObject status, Text statusLabel)
         {
@@ -222,6 +224,14 @@ namespace RogueAI.Interaction
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 ClearStarterAssetInputs();
+
+                if (starterAssetsInputs)
+                {
+                    previousStarterCursorLocked = starterAssetsInputs.cursorLocked;
+                    previousStarterCursorInputForLook = starterAssetsInputs.cursorInputForLook;
+                    starterAssetsInputs.cursorLocked = false;
+                    starterAssetsInputs.cursorInputForLook = false;
+                }
             }
 
             if (firstPersonController)
@@ -237,6 +247,13 @@ namespace RogueAI.Interaction
             if (enabled)
             {
                 ClearStarterAssetInputs();
+
+                if (starterAssetsInputs)
+                {
+                    starterAssetsInputs.cursorLocked = previousStarterCursorLocked;
+                    starterAssetsInputs.cursorInputForLook = previousStarterCursorInputForLook;
+                }
+
                 Cursor.lockState = previousCursorLockMode;
                 Cursor.visible = previousCursorVisible;
             }

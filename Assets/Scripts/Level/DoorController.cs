@@ -17,6 +17,8 @@ namespace RogueAI.Level
         [SerializeField] private TextMesh statusLabel;
         [SerializeField] private Vector3 openOffset = new Vector3(0f, 3.2f, 0f);
         [SerializeField] private float openSeconds = 1.4f;
+        [SerializeField] private string lockedStatusText = "SECURITY DOOR\nPOWER OFFLINE";
+        [SerializeField] private string openStatusText = "SECURITY ACCESS\nAVAILABLE";
 
         private Vector3 closedPosition;
         private Vector3 openPosition;
@@ -29,6 +31,12 @@ namespace RogueAI.Level
             movingDoor = doorPanel;
             statusLabel = label;
             CachePositions();
+        }
+
+        public void SetStatusMessages(string lockedText, string openText)
+        {
+            lockedStatusText = lockedText;
+            openStatusText = openText;
         }
 
         private void Awake()
@@ -46,7 +54,7 @@ namespace RogueAI.Level
                 movingDoor.gameObject.SetActive(true);
             }
 
-            SetStatus("SECURITY DOOR\nPOWER OFFLINE");
+            SetStatus(lockedStatusText);
         }
 
         public IEnumerator UnlockAndOpen()
@@ -76,7 +84,7 @@ namespace RogueAI.Level
 
             movingDoor.position = openPosition;
             state = DoorState.Open;
-            SetStatus("SECURITY ACCESS\nAVAILABLE");
+            SetStatus(openStatusText);
         }
 
         private void CachePositions()

@@ -15,6 +15,8 @@ namespace RogueAI.Level
         [SerializeField] private LevelExitTrigger levelExit;
         [SerializeField] private HardwareHudController hardwareHud;
         [SerializeField] private LevelCompletionUI completionUI;
+        [SerializeField] private Level1AudioDirector audioDirector;
+        [SerializeField] private Level1VisualStateController visualStateController;
         [SerializeField] private Level1ProgressState progressState = new Level1ProgressState();
 
         private bool powerSequenceStarted;
@@ -30,6 +32,22 @@ namespace RogueAI.Level
             HardwareHudController hud,
             LevelCompletionUI completion)
         {
+            Configure(terminal, generator, powerController, door, interaction, module, exit, hud, completion, null, null);
+        }
+
+        public void Configure(
+            TerminalInteractable terminal,
+            GeneratorController generator,
+            FacilityPowerController powerController,
+            DoorController door,
+            PlayerInteraction interaction,
+            PowerModulePickup module,
+            LevelExitTrigger exit,
+            HardwareHudController hud,
+            LevelCompletionUI completion,
+            Level1AudioDirector audio,
+            Level1VisualStateController visualState)
+        {
             generatorTerminal = terminal;
             generatorController = generator;
             facilityPowerController = powerController;
@@ -39,6 +57,8 @@ namespace RogueAI.Level
             levelExit = exit;
             hardwareHud = hud;
             completionUI = completion;
+            audioDirector = audio;
+            visualStateController = visualState;
 
             if (powerModule)
             {
@@ -53,6 +73,16 @@ namespace RogueAI.Level
             if (hardwareHud)
             {
                 hardwareHud.SetInitialState();
+            }
+
+            if (audioDirector)
+            {
+                audioDirector.ApplyPowerOffState();
+            }
+
+            if (visualStateController)
+            {
+                visualStateController.ApplyPowerOffState();
             }
 
             RegisterTerminalEvent();
@@ -113,6 +143,11 @@ namespace RogueAI.Level
                 hardwareHud.SetPowerModuleAcquired();
             }
 
+            if (audioDirector)
+            {
+                audioDirector.PlayPowerModulePickup();
+            }
+
             if (playerInteraction)
             {
                 playerInteraction.ShowStatusMessage("POWER MODULE ACQUIRED", 1.7f);
@@ -138,6 +173,11 @@ namespace RogueAI.Level
 
             progressState.levelCompleted = true;
 
+            if (audioDirector)
+            {
+                audioDirector.PlayLevelComplete();
+            }
+
             if (completionUI)
             {
                 completionUI.Show(playerInteraction);
@@ -155,6 +195,16 @@ namespace RogueAI.Level
 
             if (generatorController)
             {
+                if (audioDirector)
+                {
+                    audioDirector.PlayPowerRestoredSequence();
+                }
+
+                if (visualStateController)
+                {
+                    visualStateController.StartPowerRestoredVisuals();
+                }
+
                 yield return generatorController.StartGenerator();
                 progressState.generatorPowered = true;
             }
@@ -173,6 +223,11 @@ namespace RogueAI.Level
 
             if (securityDoor)
             {
+                if (audioDirector)
+                {
+                    audioDirector.PlayDoorOpen();
+                }
+
                 yield return securityDoor.UnlockAndOpen();
                 progressState.securityDoorUnlocked = true;
             }

@@ -47,3 +47,4 @@ sysinfo.txt
 
 # Gradle generated files
 .gradle/
+*.unitypackage

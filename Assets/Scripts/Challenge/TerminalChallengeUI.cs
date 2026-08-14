@@ -3,6 +3,7 @@ using System.Collections;
 using System.Text.RegularExpressions;
 using RogueAI.ClassQuest;
 using RogueAI.Interaction;
+using RogueAI.UI;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -79,6 +80,7 @@ namespace RogueAI.Challenges
             challengeData = data;
             playerInteraction = player;
             attemptCount = 0;
+            completed = false;
             openedAt = Time.realtimeSinceStartup;
 
             if (closeRoutine != null)
@@ -89,12 +91,6 @@ namespace RogueAI.Challenges
 
             ApplyChallengeText();
 
-            if (answerInput)
-            {
-                answerInput.text = string.Empty;
-                answerInput.ActivateInputField();
-            }
-
             if (feedbackText)
             {
                 feedbackText.text = string.Empty;
@@ -103,6 +99,12 @@ namespace RogueAI.Challenges
             if (root)
             {
                 root.SetActive(true);
+            }
+
+            if (answerInput)
+            {
+                answerInput.text = string.Empty;
+                UiInputFocusUtility.FocusInputField(this, answerInput);
             }
         }
 
@@ -149,7 +151,7 @@ namespace RogueAI.Challenges
 
                 if (answerInput)
                 {
-                    answerInput.ActivateInputField();
+                    UiInputFocusUtility.FocusInputField(this, answerInput);
                 }
 
                 return;

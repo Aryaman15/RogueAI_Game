@@ -1,4 +1,5 @@
 using RogueAI.Interaction;
+using RogueAI.UI;
 using StarterAssets;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,12 +17,18 @@ namespace RogueAI.ClassQuest
         private StarterAssetsInputs starterAssetsInputs;
         private GameObject gameplayTouchControls;
         private bool connecting;
+        private bool previousCursorVisible;
+        private bool previousStarterCursorLocked;
+        private bool previousStarterCursorInputForLook;
+        private CursorLockMode previousCursorLockMode;
 
         private void Awake()
         {
             CacheGameplayReferences();
             SetGameplayEnabled(false);
             CreateUi();
+            UiInputFocusUtility.EnsureEventSystem();
+            UiInputFocusUtility.FocusInputField(this, missionCodeInput);
         }
 
         private void OnDestroy()
@@ -86,6 +93,11 @@ namespace RogueAI.ClassQuest
 
         private void SetGameplayEnabled(bool enabled)
         {
+            if (!enabled)
+            {
+                CaptureCursorStateForUi();
+            }
+
             if (firstPersonController)
             {
                 firstPersonController.enabled = enabled;
@@ -103,6 +115,42 @@ namespace RogueAI.ClassQuest
                 starterAssetsInputs.JumpInput(false);
                 starterAssetsInputs.SprintInput(false);
             }
+
+            if (enabled)
+            {
+                RestoreCursorStateAfterUi();
+            }
+        }
+
+        private void CaptureCursorStateForUi()
+        {
+            previousCursorLockMode = Cursor.lockState;
+            previousCursorVisible = Cursor.visible;
+
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
+            if (!starterAssetsInputs)
+            {
+                return;
+            }
+
+            previousStarterCursorLocked = starterAssetsInputs.cursorLocked;
+            previousStarterCursorInputForLook = starterAssetsInputs.cursorInputForLook;
+            starterAssetsInputs.cursorLocked = false;
+            starterAssetsInputs.cursorInputForLook = false;
+        }
+
+        private void RestoreCursorStateAfterUi()
+        {
+            if (starterAssetsInputs)
+            {
+                starterAssetsInputs.cursorLocked = previousStarterCursorLocked;
+                starterAssetsInputs.cursorInputForLook = previousStarterCursorInputForLook;
+            }
+
+            Cursor.lockState = previousCursorLockMode;
+            Cursor.visible = previousCursorVisible;
         }
 
         private void CreateUi()

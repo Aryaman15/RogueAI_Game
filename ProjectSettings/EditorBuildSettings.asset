@@ -6,13 +6,16 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Level1_PowerSector.unity
-    guid: 9ec5acf9cd40d944ba7b4182e92e3105
+    path: Assets/Scenes/HQ_Gameplay.unity
+    guid: 15ed843c02ac56040aa8193db0d5f02b
   - enabled: 1
     path: Assets/StarterAssets/FirstPersonController/Scenes/Playground.unity
     guid: 707acc8dffb72b144bb1ffbe1c965f3d
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 0
+    path: Assets/Scenes/Level1_PowerSector.unity
+    guid: dfa482647bed5b349a64da1cfd93ef47
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

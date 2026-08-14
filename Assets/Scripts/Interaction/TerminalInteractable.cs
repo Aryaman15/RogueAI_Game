@@ -15,12 +15,21 @@ namespace RogueAI.Interaction
 
         public UnityEvent<string> ChallengeCompleted = new UnityEvent<string>();
 
+        private bool completed;
+
         public string InteractionPrompt => interactionPrompt;
+        public bool IsCompleted => completed;
 
         public void Configure(ChallengeData data, TerminalChallengeUI ui)
         {
             challengeData = data;
             challengeUI = ui;
+        }
+
+        public void Configure(string terminalSlotId, ChallengeData data, TerminalChallengeUI ui)
+        {
+            slotId = terminalSlotId;
+            Configure(data, ui);
         }
 
         public bool CanInteract(PlayerInteraction player)
@@ -32,7 +41,7 @@ namespace RogueAI.Interaction
         {
             ChallengeData activeChallenge = ResolveChallengeData();
 
-            if (challengeUI && challengeUI.IsCompleted)
+            if (challengeUI && completed)
             {
                 challengeUI.ShowAlreadyGranted(player, activeChallenge);
                 return;
@@ -40,7 +49,7 @@ namespace RogueAI.Interaction
 
             if (challengeUI && activeChallenge != null)
             {
-                challengeUI.ChallengeCompleted.RemoveListener(HandleChallengeCompleted);
+                challengeUI.ChallengeCompleted.RemoveAllListeners();
                 challengeUI.ChallengeCompleted.AddListener(HandleChallengeCompleted);
                 player.BeginTerminalChallenge(challengeUI, activeChallenge);
                 return;
@@ -51,6 +60,7 @@ namespace RogueAI.Interaction
 
         private void HandleChallengeCompleted(string challengeId)
         {
+            completed = true;
             ChallengeCompleted.Invoke(challengeId);
         }
 
