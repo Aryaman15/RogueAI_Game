@@ -1,5 +1,4 @@
 import {
-  BarChart3,
   BrainCircuit,
   LayoutDashboard,
   LibraryBig,
@@ -47,17 +46,6 @@ export function TeacherLayout() {
             <Plus aria-hidden="true" className="size-4" />
             Create Mission
           </NavLink>
-
-          <div className="cq-sidebar-note">
-            <p>
-              Prototype mode uses backend mission publishing with mock
-              student diagnostics for judge walkthroughs.
-            </p>
-            <p className="mt-3 flex items-center gap-2 text-cq-accent">
-              <BarChart3 aria-hidden="true" className="size-4" />
-              Command Center online
-            </p>
-          </div>
         </aside>
 
         <div className="cq-teacher-main">
