@@ -40463,7 +40463,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 296bf414ab5a4ab49e92634143c02c3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RogueAI.ClassQuest.ClassQuestApiConfig
-  baseUrl: http://192.168.1.70:4000
+  baseUrl: http://192.168.1.76:4000
   timeoutSeconds: 8
 --- !u!4 &1912818779
 Transform:

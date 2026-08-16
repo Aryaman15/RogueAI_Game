@@ -4,7 +4,7 @@ namespace RogueAI.ClassQuest
 {
     public class ClassQuestApiConfig : MonoBehaviour
     {
-        private const string DefaultDevelopmentBaseUrl = "http://192.168.1.70:4000";
+        private const string DefaultDevelopmentBaseUrl = "http://192.168.1.76:4000";
 
         [SerializeField] private string baseUrl = DefaultDevelopmentBaseUrl;
         [SerializeField] private int timeoutSeconds = 8;
