@@ -8,6 +8,30 @@ namespace RogueAI.ClassQuest
 {
     public static class ClassQuestApiClient
     {
+        public static IEnumerator GetHealth(
+            Action onSuccess,
+            Action<string> onFailure)
+        {
+            string url = $"{ClassQuestApiConfig.CurrentBaseUrl}/api/health";
+
+            using UnityWebRequest request = UnityWebRequest.Get(url);
+            request.timeout = ClassQuestApiConfig.CurrentTimeoutSeconds;
+            yield return SendWithWatchdog(request, url, onFailure);
+
+            if (!request.isDone)
+            {
+                yield break;
+            }
+
+            if (request.result != UnityWebRequest.Result.Success || request.responseCode < 200 || request.responseCode >= 300)
+            {
+                onFailure?.Invoke(GetFriendlyError(request));
+                yield break;
+            }
+
+            onSuccess?.Invoke();
+        }
+
         public static IEnumerator GetMissionByCode(
             string missionCode,
             Action<ClassQuestMissionDto> onSuccess,

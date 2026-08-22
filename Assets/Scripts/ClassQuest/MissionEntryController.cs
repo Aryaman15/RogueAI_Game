@@ -8,15 +8,18 @@ namespace RogueAI.ClassQuest
 {
     public class MissionEntryController : MonoBehaviour
     {
+        private InputField serverIpInput;
         private InputField missionCodeInput;
         private InputField studentNameInput;
         private Text statusText;
         private Button startButton;
+        private Button testConnectionButton;
         private GameObject root;
         private FirstPersonController firstPersonController;
         private StarterAssetsInputs starterAssetsInputs;
         private GameObject gameplayTouchControls;
         private bool connecting;
+        private bool testingConnection;
         private bool previousCursorVisible;
         private bool previousStarterCursorLocked;
         private bool previousStarterCursorInputForLook;
@@ -49,6 +52,11 @@ namespace RogueAI.ClassQuest
             string missionCode = missionCodeInput ? missionCodeInput.text.Trim().ToUpperInvariant() : string.Empty;
             string studentName = studentNameInput ? studentNameInput.text.Trim() : string.Empty;
 
+            if (!TryApplyServerIpFromInput(out string baseUrl))
+            {
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(missionCode) || string.IsNullOrWhiteSpace(studentName))
             {
                 SetStatus("MISSION CODE AND STUDENT NAME REQUIRED", true);
@@ -57,7 +65,12 @@ namespace RogueAI.ClassQuest
 
             connecting = true;
             startButton.interactable = false;
-            SetStatus($"CONNECTING TO CLASSQUEST...\n{ClassQuestApiConfig.CurrentBaseUrl}", false);
+            if (testConnectionButton)
+            {
+                testConnectionButton.interactable = false;
+            }
+
+            SetStatus($"CONNECTING TO CLASSQUEST...\n{baseUrl}", false);
 
             StartCoroutine(ClassQuestApiClient.GetMissionByCode(
                 missionCode,
@@ -73,8 +86,57 @@ namespace RogueAI.ClassQuest
                 {
                     connecting = false;
                     startButton.interactable = true;
+                    if (testConnectionButton)
+                    {
+                        testConnectionButton.interactable = true;
+                    }
+
                     SetStatus(error == "MISSION NOT FOUND" ? "MISSION NOT FOUND" : error, true);
                 }));
+        }
+
+        private void TestConnection()
+        {
+            if (connecting || testingConnection || !TryApplyServerIpFromInput(out string baseUrl))
+            {
+                return;
+            }
+
+            testingConnection = true;
+            startButton.interactable = false;
+            testConnectionButton.interactable = false;
+            SetStatus($"CONNECTING...\n{baseUrl}", false);
+
+            StartCoroutine(ClassQuestApiClient.GetHealth(
+                () =>
+                {
+                    testingConnection = false;
+                    startButton.interactable = true;
+                    testConnectionButton.interactable = true;
+                    SetStatus("SERVER CONNECTED", false);
+                },
+                _ =>
+                {
+                    testingConnection = false;
+                    startButton.interactable = true;
+                    testConnectionButton.interactable = true;
+                    SetStatus("CONNECTION FAILED", true);
+                }));
+        }
+
+        private bool TryApplyServerIpFromInput(out string baseUrl)
+        {
+            baseUrl = string.Empty;
+            string serverIp = serverIpInput ? serverIpInput.text.Trim() : string.Empty;
+
+            if (ClassQuestApiConfig.TryApplyServerIp(serverIp, out baseUrl, out string validationError))
+            {
+                return true;
+            }
+
+            SetStatus(validationError, true);
+            UiInputFocusUtility.FocusInputField(this, serverIpInput);
+            return false;
         }
 
         private void CacheGameplayReferences()
@@ -188,17 +250,26 @@ namespace RogueAI.ClassQuest
             Text subtitle = CreateText(panel.transform, "Text_Subtitle", "Enter the mission code provided by your teacher.", 30, FontStyle.Normal, new Color(0.72f, 0.82f, 0.86f));
             SetRect(subtitle.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -232f), new Vector2(1000f, 52f));
 
+            Text serverLabel = CreateText(panel.transform, "Text_ServerIpLabel", "SERVER IP", 25, FontStyle.Bold, new Color(0.35f, 1f, 0.85f));
+            SetRect(serverLabel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 116f), new Vector2(620f, 42f));
+            serverIpInput = CreateInput(panel.transform, "Input_ServerIp", "192.168.1.67", new Vector2(0f, 60f));
+            serverIpInput.text = ClassQuestApiConfig.GetSavedOrDefaultServerIp();
+            serverIpInput.characterLimit = 15;
+            serverIpInput.keyboardType = TouchScreenKeyboardType.NumbersAndPunctuation;
+            serverIpInput.contentType = InputField.ContentType.Custom;
+
             Text codeLabel = CreateText(panel.transform, "Text_MissionCodeLabel", "MISSION CODE", 25, FontStyle.Bold, new Color(0.35f, 1f, 0.85f));
-            SetRect(codeLabel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 86f), new Vector2(620f, 42f));
-            missionCodeInput = CreateInput(panel.transform, "Input_MissionCode", "CQ-XXXX", new Vector2(0f, 28f));
+            SetRect(codeLabel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 8f), new Vector2(620f, 42f));
+            missionCodeInput = CreateInput(panel.transform, "Input_MissionCode", "CQ-XXXX", new Vector2(0f, -48f));
 
             Text nameLabel = CreateText(panel.transform, "Text_StudentNameLabel", "STUDENT NAME", 25, FontStyle.Bold, new Color(0.35f, 1f, 0.85f));
-            SetRect(nameLabel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, -70f), new Vector2(620f, 42f));
-            studentNameInput = CreateInput(panel.transform, "Input_StudentName", "Aryaman", new Vector2(0f, -128f));
+            SetRect(nameLabel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, -96f), new Vector2(620f, 42f));
+            studentNameInput = CreateInput(panel.transform, "Input_StudentName", "Aryaman", new Vector2(0f, -152f));
 
-            startButton = CreateButton(panel.transform);
+            testConnectionButton = CreateButton(panel.transform, "Button_TestConnection", "TEST CONNECTION", new Vector2(-235f, -264f), new Vector2(410f, 78f), TestConnection, new Color(0.12f, 0.3f, 0.38f, 1f));
+            startButton = CreateButton(panel.transform, "Button_StartMission", "START MISSION", new Vector2(235f, -264f), new Vector2(410f, 78f), StartMission, new Color(0.04f, 0.58f, 0.62f, 1f));
             statusText = CreateText(panel.transform, "Text_Status", string.Empty, 24, FontStyle.Bold, new Color(0.35f, 1f, 0.85f));
-            SetRect(statusText.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 110f), new Vector2(1120f, 96f));
+            SetRect(statusText.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 94f), new Vector2(1220f, 92f));
         }
 
         private InputField CreateInput(Transform parent, string name, string placeholderText, Vector2 position)
@@ -229,20 +300,20 @@ namespace RogueAI.ClassQuest
             return input;
         }
 
-        private Button CreateButton(Transform parent)
+        private Button CreateButton(Transform parent, string name, string labelText, Vector2 position, Vector2 size, UnityEngine.Events.UnityAction action, Color color)
         {
-            GameObject buttonObject = new GameObject("Button_StartMission");
+            GameObject buttonObject = new GameObject(name);
             buttonObject.transform.SetParent(parent, false);
             RectTransform buttonRect = buttonObject.AddComponent<RectTransform>();
-            SetRect(buttonRect, new Vector2(0.5f, 0.5f), new Vector2(0f, -238f), new Vector2(430f, 82f));
+            SetRect(buttonRect, new Vector2(0.5f, 0.5f), position, size);
 
             Image buttonImage = buttonObject.AddComponent<Image>();
-            buttonImage.color = new Color(0.04f, 0.58f, 0.62f, 1f);
+            buttonImage.color = color;
 
             Button button = buttonObject.AddComponent<Button>();
-            button.onClick.AddListener(StartMission);
+            button.onClick.AddListener(action);
 
-            Text label = CreateText(buttonObject.transform, "Text_StartMission", "START MISSION", 34, FontStyle.Bold, Color.white);
+            Text label = CreateText(buttonObject.transform, $"Text_{name}", labelText, 30, FontStyle.Bold, Color.white);
             Stretch(label.rectTransform);
             return button;
         }
